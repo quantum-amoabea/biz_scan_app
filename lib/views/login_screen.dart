@@ -60,10 +60,14 @@ class LoginScreen extends StatelessWidget {
                 text: 'Sign In',
                 icon: true,
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => NavBar()),
-                  );
+                   Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const NavBar(initialIndex: 0),
+                            ),
+                            (route) => false,
+                          );
                 },
               ),
               SizedBox(height: 20),

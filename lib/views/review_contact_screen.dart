@@ -18,6 +18,8 @@ class ReviewContactScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cameraProvider = context.watch<CameraProvider>();
+    String? selectedCountry;
+    final countries = ['Ghana', 'Kenya', 'Sudan'];
 
     return Scaffold(
       appBar: const CustomAppBar(),
@@ -78,6 +80,37 @@ class ReviewContactScreen extends StatelessWidget {
                       cameraProvider.removeBackImage();
                     },
                   ),
+
+                const SizedBox(height: 20),
+
+                DropdownButtonFormField<String>(
+                  decoration: InputDecoration(
+                    labelText: "Card collected in",
+                    labelStyle: TextStyle(color: BaseColors().blackColor),
+                    prefixIcon: Icon(Icons.public),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide:  BorderSide(color: BaseColors().greyColor),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide:  BorderSide(
+                        color: BaseColors().greyColor,
+                        width: 0.8,
+                      ),
+                    ),
+                  ),
+                  initialValue: selectedCountry,
+                  items: countries.map((auth) {
+                    return DropdownMenuItem(value: auth, child: Text(auth));
+                  }).toList(),
+                  onChanged: (value) {
+
+                  },
+                ),
 
                 const SizedBox(height: 20),
 

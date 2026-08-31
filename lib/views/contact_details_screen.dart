@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../utils/pop_menu_selector.dart';
+import 'nav_bar.dart';
 
 class ContactDetailsScreen extends StatelessWidget {
   const ContactDetailsScreen({super.key});
@@ -52,9 +53,9 @@ class ContactDetailsScreen extends StatelessWidget {
                   ),
                 ],
               ),
-          
+
               const SizedBox(height: 20),
-          
+
               // Business card image
               Container(
                 width: double.infinity,
@@ -77,9 +78,9 @@ class ContactDetailsScreen extends StatelessWidget {
                         color: BaseColors().greyColor,
                       ),
               ),
-          
+
               const SizedBox(height: 20),
-          
+
               // Action buttons
               GridView.count(
                 crossAxisCount: 2,
@@ -94,25 +95,25 @@ class ContactDetailsScreen extends StatelessWidget {
                     label: 'Call Mobile',
                     onPressed: () => callNow('0200000000'),
                   ),
-          
+
                   _ActionButton(
                     icon: Icons.message_outlined,
                     label: 'Text',
                     onPressed: () => sendSms('0200000000'),
                   ),
-          
+
                   _ActionButton(
                     icon: Icons.chat,
                     label: 'WhatsApp',
                     onPressed: () => whatsApp('0200000000'),
                   ),
-          
+
                   _ActionButton(
                     icon: Icons.email_outlined,
                     label: 'Email',
                     onPressed: () => sendEmail('amoabeaakuaosafo@gmail.com'),
                   ),
-          
+
                   _ActionButton(
                     icon: Icons.person_add_alt_1,
                     label: 'Save to Phone',
@@ -120,13 +121,28 @@ class ContactDetailsScreen extends StatelessWidget {
                   ),
                 ],
               ),
-          
+
               const SizedBox(height: 20),
-          
+
               // Personal details card
               _PersonalDetailsCard(),
               SizedBox(height: 10),
               _ContactDetailsCard(),
+              SizedBox(height: 20),
+
+              SizedBox(
+                width: double.infinity,
+                child: CustomTextButton(
+                  text: "Done",
+                  onPressed: () => Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const NavBar(initialIndex: 2),
+                    ),
+                    (route) => false,
+                  ),
+                ),
+              ),
             ],
           ),
         ),

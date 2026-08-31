@@ -1,3 +1,4 @@
+import 'package:biz_scan_app/views/login_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -25,7 +26,16 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       shadowColor: BaseColors().greyColor,
       actions: [
         IconButton(
-          onPressed: () {},
+          onPressed: () {
+             Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const LoginScreen(),
+                            ),
+                            (route) => false,
+                          );
+          },
           icon: Icon(
             Icons.logout,
             color: BaseColors().primaryColor,
