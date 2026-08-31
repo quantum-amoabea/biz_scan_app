@@ -17,7 +17,8 @@ class PrefsManager {
     _prefs = await SharedPreferences.getInstance();
   }
 
-  final String tokenKey = 'token';
+  final String accessTokenKey = 'access_token';
+  final String refreshTokenKey = 'refresh_token';
   final String emailKey = 'email';
   final String usernameKey = 'username';
   final String fullNameKey = 'full_name';
@@ -30,15 +31,22 @@ class PrefsManager {
   final String macAddressKey = 'macAddress';
   final String deviceFingerPrintKey = 'deviceFingerPrint';
 
-  Future<void> setToken(String token) async =>
-      await _prefs?.setString(tokenKey, token);
+  Future<void> setAccessToken(String token) async =>
+      await _prefs?.setString(accessTokenKey, token);
 
-  String getToken() => _prefs?.getString(tokenKey) ?? "";
+  String getAccessToken() => _prefs?.getString(accessTokenKey) ?? "";
 
-  Future<void> clearToken() async => await _prefs?.remove(tokenKey);
+  Future<void> clearAccessToken() async => await _prefs?.remove(accessTokenKey);
 
+  Future<void> setRefreshToken(String token) async =>
+      await _prefs?.setString(refreshTokenKey, token);
 
-    Future<void> setUserId(String userId) async =>
+  String getRefreshToken() => _prefs?.getString(refreshTokenKey) ?? "";
+
+  Future<void> clearRefreshToken() async =>
+      await _prefs?.remove(refreshTokenKey);
+
+  Future<void> setUserId(String userId) async =>
       await _prefs?.setString(userIdKey, userId);
 
   String getUserId() => _prefs?.getString(userIdKey) ?? '';
@@ -65,8 +73,6 @@ class PrefsManager {
   String getFullName() => _prefs?.getString(fullNameKey) ?? "";
 
   Future<void> clearFullName() async => await _prefs?.remove(fullNameKey);
-
-
 
   Future<void> setPassword(String password) async =>
       await _prefs?.setString(passwordKey, password);
@@ -98,25 +104,19 @@ class PrefsManager {
 
   String getAppVersion() => _prefs?.getString(appVersionKey) ?? "";
 
-
   Future<void> setDeviceId(String deviceId) async =>
       await _prefs?.setString(deviceIdKey, deviceId);
 
   String getDeviceId() => _prefs?.getString(deviceIdKey) ?? "";
-
 
   Future<void> setMacAddress(String macAddress) async =>
       await _prefs?.setString(macAddressKey, macAddress);
 
   String getMacAddress() => _prefs?.getString(macAddressKey) ?? "";
 
-
   Future<void> setDeviceFingerPrint(String deviceFingerPrint) async =>
       await _prefs?.setString(deviceFingerPrintKey, deviceFingerPrint);
 
   String getDeviceFingerPrint() =>
       _prefs?.getString(deviceFingerPrintKey) ?? "";
-
-
-
 }

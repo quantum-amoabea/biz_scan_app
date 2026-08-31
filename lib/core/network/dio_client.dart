@@ -20,26 +20,29 @@ class DioClient {
 
   Future<void> initDioClient() async {
     final serverUrl = dotenv.env["BASE_URL"] ?? '';
-     _dio = Dio(
-    BaseOptions(
-      baseUrl: "$serverUrl/business-card/",
-      connectTimeout: const Duration(seconds: 30),
-      receiveTimeout: const Duration(seconds: 30),
-      sendTimeout: const Duration(seconds: 30),
-    ),
-  );
+    _dio = Dio(
+      BaseOptions(
+        baseUrl: "$serverUrl/business-card/",
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 30),
+        sendTimeout: const Duration(seconds: 30),
+      ),
+    );
 
     final tokenInterceptor = TokenInterceptor(_dio);
 
     _dio.interceptors.addAll([
-      AwesomeDioInterceptor(logger: print),
       tokenInterceptor,
+      AwesomeDioInterceptor(logger: print),
     ]);
   }
 
   // get endpoint
-  Future get(String endpoint,
-      [Map<String, dynamic>? queryParameters, String token = '']) async {
+  Future get(
+    String endpoint, [
+    Map<String, dynamic>? queryParameters,
+    String token = '',
+  ]) async {
     Response response;
     try {
       _dio.options.baseUrl = "${dotenv.env["BASE_URL"]}/business-card/";
@@ -60,15 +63,13 @@ class DioClient {
   }) async {
     Response response;
 
-    final token = PrefsManager().getToken();
+    //final token = PrefsManager().getToken();
 
-    final Map<String, String> headers = {
-      'Content-Type': contentType,
-    };
+    final Map<String, String> headers = {'Content-Type': contentType};
 
-    if (includeAuth && token.isNotEmpty) {
+   /* if (includeAuth && token.isNotEmpty) {
       headers['Authorization'] = 'Bearer $token';
-    }
+    }*/
 
     try {
       debugPrint("Body: $body");
@@ -116,18 +117,14 @@ class DioClient {
 
   Future<dynamic> put(String endpoint, dynamic data) async {
     try {
-      final token = await PrefsManager().getToken();
+     // final token = await PrefsManager().getToken();
 
       final Map<String, String> headers = {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
+       // 'Authorization': 'Bearer $token',
       };
       Options options = Options(headers: headers);
-      final response = await _dio.put(
-        endpoint,
-        data: data,
-        options: options,
-      );
+      final response = await _dio.put(endpoint, data: data, options: options);
       return response.data;
     } on DioException catch (e) {
       debugPrint("Error Message: ${e.message}");

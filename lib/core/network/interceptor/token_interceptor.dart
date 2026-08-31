@@ -22,7 +22,7 @@ class TokenInterceptor extends Interceptor {
       RequestOptions options, RequestInterceptorHandler handler) async {
     debugPrint(
         'TokenInterceptor onRequest -> ${options.method} ${options.path}');
-    final token = PrefsManager().getToken();
+        final token = PrefsManager().getAccessToken();
     // ignore: unnecessary_null_comparison
     if (token != null) {
       options.headers['Authorization'] = 'Bearer $token';
@@ -45,7 +45,7 @@ class TokenInterceptor extends Interceptor {
         debugPrint('Refreshing token...');
         try {
           await _refreshToken();
-          final newToken = await PrefsManager().getToken();
+          final newToken = await PrefsManager().getAccessToken();
           debugPrint('New token acquired: $newToken');
           for (final pending in _queue) {
             debugPrint('Retrying request: ${pending.options.path}');
@@ -95,7 +95,7 @@ class TokenInterceptor extends Interceptor {
         'Refresh token response: ${response.statusCode} ${response.data}');
 
     final newToken = response.data['access_token'];
-    await PrefsManager().setToken(newToken);
+    await PrefsManager().setAccessToken(newToken);
     debugPrint('Token saved to PrefsManager');
   }
 }
