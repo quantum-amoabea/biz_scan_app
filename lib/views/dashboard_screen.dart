@@ -1,4 +1,5 @@
 import 'package:biz_scan_app/core/colors.dart';
+import 'package:biz_scan_app/views/merge_contact_screen.dart';
 import 'package:biz_scan_app/widgets/custom_textbutton.dart';
 import 'package:flutter/material.dart';
 
@@ -128,6 +129,9 @@ class DashboardScreen extends StatelessWidget {
                       value: '0',
                       title: 'Awaiting Review',
                       icon: Icons.event_note_outlined,
+                      onTap: (){
+
+                      },
                     ),
                   ),
 
@@ -138,6 +142,9 @@ class DashboardScreen extends StatelessWidget {
                       value: '0',
                       title: 'Possible Duplicates',
                       icon: Icons.copy,
+                      onTap: (){
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=> MergeContactScreen()));
+                      },
                     ),
                   ),
                 ],
