@@ -27,7 +27,7 @@ class CameraProvider extends ChangeNotifier {
   }
 
   void removeFrontImage() {
-    backImage = null;
+   frontImage = null;
     notifyListeners();
   }
 

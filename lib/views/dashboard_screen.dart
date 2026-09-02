@@ -1,4 +1,5 @@
 import 'package:biz_scan_app/core/colors.dart';
+import 'package:biz_scan_app/core/offline/prefs_manager.dart';
 import 'package:biz_scan_app/views/merge_contact_screen.dart';
 import 'package:biz_scan_app/widgets/custom_textbutton.dart';
 import 'package:flutter/material.dart';
@@ -21,9 +22,9 @@ class DashboardScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Welcome, Gideon Boateng',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              Text(
+                'Welcome, ${PrefsManager().getUser()?.displayName ?? 'User'}',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
               ),
 
               const SizedBox(height: 20),

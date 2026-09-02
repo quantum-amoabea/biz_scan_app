@@ -32,7 +32,8 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    final user = LoginUser(username: username, password: password);
+    try{
+      final user = LoginUser(username: username, password: password);
 
     await context.read<LoginProvider>().loginUser(user);
 
@@ -43,6 +44,10 @@ class _LoginScreenState extends State<LoginScreen> {
       MaterialPageRoute(builder: (context) => NavBar()),
       (route) => false,
     );
+    }
+    catch(e){
+      showToast(message: e.toString());
+    }
   }
 
   @override

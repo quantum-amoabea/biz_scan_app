@@ -1,5 +1,6 @@
 import 'package:biz_scan_app/view_models/camera_provider.dart';
 import 'package:biz_scan_app/view_models/login_provider.dart';
+import 'package:biz_scan_app/view_models/scan_provider.dart';
 import 'package:biz_scan_app/views/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -26,6 +27,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => CameraProvider()),
         ChangeNotifierProvider(create: (_) => LoginProvider()),
+        ChangeNotifierProvider(create: (_) => ScanProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

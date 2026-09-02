@@ -28,9 +28,6 @@ class LoginProvider extends ChangeNotifier {
       prefsManager.setUser(loginUserResponse?.user ?? User());
 
       debugPrint('the user is $loginUserResponse');
-    } catch (e) {
-      debugPrint('the error is $e');
-      showToast(message: e.toString());
     } finally {
       _isLoading = false;
       notifyListeners();

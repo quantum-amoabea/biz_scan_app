@@ -9,7 +9,6 @@ void showImageSourceActionSheet(
   BuildContext context, {
   required bool isFrontImage,
 }) {
-  final cameraProvider = context.read<CameraProvider>();
   showModalBottomSheet(
     context: context,
     builder: (_) => SafeArea(

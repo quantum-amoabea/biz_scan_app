@@ -63,13 +63,13 @@ class DioClient {
   }) async {
     Response response;
 
-    //final token = PrefsManager().getToken();
+    final token = PrefsManager().getAccessToken();
 
     final Map<String, String> headers = {'Content-Type': contentType};
 
-   /* if (includeAuth && token.isNotEmpty) {
+    if (includeAuth && token.isNotEmpty) {
       headers['Authorization'] = 'Bearer $token';
-    }*/
+    }
 
     try {
       debugPrint("Body: $body");

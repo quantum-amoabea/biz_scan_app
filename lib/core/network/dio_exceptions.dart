@@ -54,11 +54,13 @@ class DioExceptions implements Exception {
             ? error['detail']
             : 'Oops, something went wrong with your request. Please check your input and try again.';
       case 401:
-        return error['detail'];
+        return error['error_message'];
       case 403:
         return 'Access Denied. You do not have the necessary permissions to perform this action';
       case 404:
-        return error['message'];
+        return error['error_message'];
+      case 409:
+        return error['error_message'];
       case 500:
         return 'Oops, something went wrong on our end. Please try again later or contact support';
       case 502:

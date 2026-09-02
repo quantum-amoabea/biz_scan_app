@@ -5,6 +5,9 @@ import 'package:biz_scan_app/core/toast_message.dart';
 import 'package:biz_scan_app/services/contact_services.dart';
 import 'package:biz_scan_app/utils/utils.dart';
 import 'package:biz_scan_app/view_models/camera_provider.dart';
+import 'package:biz_scan_app/view_models/scan_provider.dart';
+import 'package:biz_scan_app/views/review_contact_screen.dart';
+import 'package:biz_scan_app/views/scan_screen.dart';
 import 'package:biz_scan_app/widgets/custom_app_bar.dart';
 import 'package:biz_scan_app/widgets/custom_textbutton.dart';
 import 'package:biz_scan_app/widgets/custom_textfield.dart';
@@ -21,6 +24,8 @@ class ContactDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cameraProvider = context.watch<CameraProvider>();
+    final scanProvider = context.read<ScanProvider>();
+    final readCameraProvider = context.read<CameraProvider>();
     return Scaffold(
       backgroundColor: BaseColors().whiteColor,
       appBar: const CustomAppBar(),
@@ -130,18 +135,35 @@ class ContactDetailsScreen extends StatelessWidget {
               _ContactDetailsCard(),
               SizedBox(height: 20),
 
-              SizedBox(
-                width: double.infinity,
-                child: CustomTextButton(
-                  text: "Done",
-                  onPressed: () => Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const NavBar(initialIndex: 2),
+              Row(
+                children: [
+                  Expanded(
+                    child: CustomTextButton(
+                      text: "Cancel",
+                      backgroundColor: Colors.transparent,
+                      foregroundColor: BaseColors().primaryColor,
+                      onPressed: () {
+                        readCameraProvider.clearAllImages();
+                        scanProvider.resetScan();
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=> ScanScreen()));
+                      },
                     ),
-                    (route) => false,
                   ),
-                ),
+                  SizedBox(width: 20),
+
+                  Expanded(
+                    child: CustomTextButton(
+                      text: "Done",
+                      onPressed: () => Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const NavBar(initialIndex: 2),
+                        ),
+                        (route) => false,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -188,17 +210,33 @@ class _PersonalDetailsCard extends StatefulWidget {
 class _PersonalDetailsCardState extends State<_PersonalDetailsCard> {
   bool isEditing = false;
 
-  final nameController = TextEditingController(text: 'ASHISH Nyame');
+  late final TextEditingController nameController;
+  late final TextEditingController jobTitleController;
+  late final TextEditingController companyController;
+  late final TextEditingController industryController;
 
-  final jobTitleController = TextEditingController(
-    text: 'AVP-BUSINESS EVANGELIST',
-  );
+  @override
+  void initState() {
+    super.initState();
 
-  final companyController = TextEditingController(
-    text: 'Protectt.ai.Labs Pvt.Ltd',
-  );
+    final scannedDetails = context.read<ScanProvider>().scannedCardDetails;
 
-  final industryController = TextEditingController(text: 'Technology');
+    nameController = TextEditingController(
+      text: scannedDetails?.contact?.fullName ?? '',
+    );
+
+    jobTitleController = TextEditingController(
+      text: scannedDetails?.contact?.jobTitle ?? '',
+    );
+
+    companyController = TextEditingController(
+      text: scannedDetails?.contact?.company ?? '',
+    );
+
+    industryController = TextEditingController(
+      text: scannedDetails?.contact?.industry ?? '',
+    );
+  }
 
   @override
   void dispose() {
@@ -227,7 +265,6 @@ class _PersonalDetailsCardState extends State<_PersonalDetailsCard> {
       ),
       child: Column(
         children: [
-          // Header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -288,34 +325,34 @@ class _PersonalDetailsCardState extends State<_PersonalDetailsCard> {
               },
             ),
           ] else ...[
-            const ContactDetailItem(
+            ContactDetailItem(
               icon: Icons.person,
               label: 'Full Name',
-              value: 'ASHISH Nyame',
+              value: nameController.text,
             ),
 
             const SizedBox(height: 15),
 
-            const ContactDetailItem(
+            ContactDetailItem(
               icon: Icons.work,
               label: 'Job Title',
-              value: 'AVP-BUSINESS EVANGELIST',
+              value: jobTitleController.text,
             ),
 
             const SizedBox(height: 15),
 
-            const ContactDetailItem(
+            ContactDetailItem(
               icon: Icons.business,
               label: 'Company',
-              value: 'Protectt.ai.Labs Pvt.Ltd',
+              value: companyController.text,
             ),
 
             const SizedBox(height: 15),
 
-            const ContactDetailItem(
+            ContactDetailItem(
               icon: Icons.business_outlined,
               label: 'Industry',
-              value: 'Technology',
+              value: industryController.text,
             ),
           ],
         ],
@@ -339,28 +376,41 @@ class ContactDetailItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(icon),
         const SizedBox(width: 10),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(label),
-            Row(
-              children: [
-                Text(value, style: TextStyle(fontWeight: FontWeight.w500)),
-                IconButton(
-                  color: BaseColors().greyColor,
-                  iconSize: 17,
-                  onPressed: () {
-                    Clipboard.setData(ClipboardData(text: value));
-                    showToast(message: "Copied to Clipboard");
-                  },
-                  icon: Icon(Icons.copy),
-                ),
-              ],
-            ),
-          ],
+
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      value,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+
+                  IconButton(
+                    color: BaseColors().greyColor,
+                    iconSize: 17,
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: value));
+
+                      showToast(message: "Copied to Clipboard");
+                    },
+                    icon: const Icon(Icons.copy),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -377,22 +427,61 @@ class _ContactDetailsCard extends StatefulWidget {
 class _ContactDetailsCardState extends State<_ContactDetailsCard> {
   bool isEditing = false;
 
-  final phoneController = TextEditingController(text: '+233 20 000 0000');
+  final List<TextEditingController> phoneControllers = [];
+  final List<TextEditingController> emailControllers = [];
+  late TextEditingController websiteController;
 
-  final emailController = TextEditingController(text: 'ashish@example.com');
+  @override
+  void initState() {
+    super.initState();
 
-  final websiteController = TextEditingController(text: 'https://protectt.com');
+    final contact = context.read<ScanProvider>().scannedCardDetails?.contact;
+
+    // Phones
+    for (final phone in contact?.phones ?? []) {
+      phoneControllers.add(
+        TextEditingController(
+          text: phone.display ?? phone.e164 ?? phone.raw ?? '',
+        ),
+      );
+    }
+
+    // Emails
+    for (final email in contact?.emails ?? []) {
+      emailControllers.add(TextEditingController(text: email.email ?? ''));
+    }
+
+    // Website
+    final website = contact?.socials
+        ?.where((social) => social.platform?.toLowerCase() == 'website')
+        .firstOrNull;
+
+    websiteController = TextEditingController(text: website?.url ?? '');
+  }
 
   @override
   void dispose() {
-    phoneController.dispose();
-    emailController.dispose();
+    for (final controller in phoneControllers) {
+      controller.dispose();
+    }
+
+    for (final controller in emailControllers) {
+      controller.dispose();
+    }
+
     websiteController.dispose();
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final contact = context.watch<ScanProvider>().scannedCardDetails?.contact;
+
+    final phones = contact?.phones ?? [];
+    final emails = contact?.emails ?? [];
+    final socials = contact?.socials ?? [];
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -445,27 +534,44 @@ class _ContactDetailsCardState extends State<_ContactDetailsCard> {
           const SizedBox(height: 15),
 
           if (isEditing) ...[
-            _EditField(
-              label: 'Phone',
-              controller: phoneController,
-              keyboardType: TextInputType.phone,
+            ...List.generate(
+              phoneControllers.length,
+              (index) => Padding(
+                padding: const EdgeInsets.only(bottom: 15),
+                child: _EditField(
+                  label:
+                      phones[index].type != null &&
+                          phones[index].type!.isNotEmpty
+                      ? 'Phone (${phones[index].type})'
+                      : 'Phone ${index + 1}',
+                  controller: phoneControllers[index],
+                  keyboardType: TextInputType.phone,
+                ),
+              ),
             ),
 
-            const SizedBox(height: 15),
-
-            _EditField(
-              label: 'Email',
-              controller: emailController,
-              keyboardType: TextInputType.emailAddress,
+            ...List.generate(
+              emailControllers.length,
+              (index) => Padding(
+                padding: const EdgeInsets.only(bottom: 15),
+                child: _EditField(
+                  label:
+                      emails[index].type != null &&
+                          emails[index].type!.isNotEmpty
+                      ? 'Email (${emails[index].type})'
+                      : 'Email ${index + 1}',
+                  controller: emailControllers[index],
+                  keyboardType: TextInputType.emailAddress,
+                ),
+              ),
             ),
 
-            const SizedBox(height: 15),
-
-            _EditField(
-              label: 'Website',
-              controller: websiteController,
-              keyboardType: TextInputType.url,
-            ),
+            if (websiteController.text.isNotEmpty)
+              _EditField(
+                label: 'Website',
+                controller: websiteController,
+                keyboardType: TextInputType.url,
+              ),
 
             const SizedBox(height: 20),
 
@@ -478,27 +584,48 @@ class _ContactDetailsCardState extends State<_ContactDetailsCard> {
               },
             ),
           ] else ...[
-            const ContactDetailItem(
-              icon: Icons.phone_outlined,
-              label: 'Phone',
-              value: '+233 20 000 0000',
-            ),
+            ...List.generate(phones.length, (index) {
+              final phone = phones[index];
 
-            const SizedBox(height: 15),
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 15),
+                child: ContactDetailItem(
+                  icon: Icons.phone_outlined,
+                  label: phone.type != null && phone.type!.isNotEmpty
+                      ? 'Phone (${phone.type})'
+                      : 'Phone ${index + 1}',
+                  value: phone.display ?? phone.e164 ?? phone.raw ?? '',
+                ),
+              );
+            }),
 
-            const ContactDetailItem(
-              icon: Icons.email_outlined,
-              label: 'Email',
-              value: 'ashish@example.com',
-            ),
+            ...List.generate(emails.length, (index) {
+              final email = emails[index];
 
-            const SizedBox(height: 15),
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 15),
+                child: ContactDetailItem(
+                  icon: Icons.email_outlined,
+                  label: email.type != null && email.type!.isNotEmpty
+                      ? 'Email (${email.type})'
+                      : 'Email ${index + 1}',
+                  value: email.email ?? '',
+                ),
+              );
+            }),
 
-            const ContactDetailItem(
-              icon: Icons.web,
-              label: 'Website',
-              value: 'https://protectt.com',
-            ),
+            ...socials
+                .where((social) => social.url != null && social.url!.isNotEmpty)
+                .map(
+                  (social) => Padding(
+                    padding: const EdgeInsets.only(bottom: 15),
+                    child: ContactDetailItem(
+                      icon: Icons.web,
+                      label: social.platform ?? 'Website',
+                      value: social.url ?? '',
+                    ),
+                  ),
+                ),
           ],
         ],
       ),

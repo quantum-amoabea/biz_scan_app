@@ -44,7 +44,7 @@ class TokenInterceptor extends Interceptor {
         _isRefreshing = true;
         debugPrint('Refreshing token...');
         try {
-          await _refreshToken();
+          //await _refreshToken();
           final newToken = await PrefsManager().getAccessToken();
           debugPrint('New token acquired: $newToken');
           for (final pending in _queue) {
@@ -78,6 +78,7 @@ class TokenInterceptor extends Interceptor {
     }
   }
 
+/*
   Future<void> _refreshToken() async {
     debugPrint('TokenInterceptor _refreshToken called');
     final username = await PrefsManager().getUsername();
@@ -98,6 +99,7 @@ class TokenInterceptor extends Interceptor {
     await PrefsManager().setAccessToken(newToken);
     debugPrint('Token saved to PrefsManager');
   }
+*/
 }
 
 class PendingRequest {

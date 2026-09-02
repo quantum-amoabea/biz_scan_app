@@ -1,15 +1,20 @@
 import 'package:biz_scan_app/core/colors.dart';
+import 'package:biz_scan_app/view_models/camera_provider.dart';
+import 'package:biz_scan_app/view_models/scan_provider.dart';
 import 'package:biz_scan_app/widgets/custom_app_bar.dart';
 import 'package:biz_scan_app/widgets/custom_textbutton.dart';
 import 'package:biz_scan_app/widgets/image_modal_sheet.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class ScanScreen extends StatelessWidget {
   const ScanScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final cameraProvider = context.read<CameraProvider>();
+    final scanProvider = context.read<ScanProvider>();
     return Scaffold(
       backgroundColor: BaseColors().whiteColor,
       appBar: CustomAppBar(),
@@ -48,11 +53,18 @@ class ScanScreen extends StatelessWidget {
                         textAlign: TextAlign.center,
                       ),
                       SizedBox(height: 20),
-        
+
                       CustomTextButton(
                         text: "Choose a photo",
                         borderRadius: 30,
-                        onPressed: () => showImageSourceActionSheet(context, isFrontImage: true),
+                        onPressed: () {
+                          cameraProvider.clearAllImages();
+                          scanProvider.resetScan();
+                          showImageSourceActionSheet(
+                            context,
+                            isFrontImage: true,
+                          );
+                        },
                       ),
                     ],
                   ),

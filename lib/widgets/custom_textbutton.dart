@@ -36,6 +36,9 @@ class CustomTextButton extends StatelessWidget {
     );
 
     return Container(
+      constraints: BoxConstraints(
+        minHeight: getProportionateScreenHeight(48),
+      ),
       decoration: BoxDecoration(
         color: gradient == null
             ? (backgroundColor ?? BaseColors().primaryColor)
@@ -48,14 +51,31 @@ class CustomTextButton extends StatelessWidget {
         style: TextButton.styleFrom(
           backgroundColor: Colors.transparent,
           foregroundColor: foregroundColor ?? Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: radius),
-          side: BorderSide(color: BaseColors().primaryColor, width: 1),
+
+          minimumSize: Size(
+            double.infinity,
+            getProportionateScreenHeight(48),
+          ),
+
+          padding: EdgeInsets.symmetric(
+            vertical: verticalPadding ?? 12,
+            horizontal: horizontalPadding ?? 20,
+          ),
+
+          shape: RoundedRectangleBorder(
+            borderRadius: radius,
+          ),
+
+          side: BorderSide(
+            color: BaseColors().primaryColor,
+            width: 1,
+          ),
         ),
         child: isLoading == true
             ? SizedBox(
                 height: getProportionateScreenHeight(20),
                 width: getProportionateScreenHeight(20),
-                child: CircularProgressIndicator(
+                child: const CircularProgressIndicator(
                   strokeWidth: 3,
                   color: Colors.white,
                 ),
@@ -71,6 +91,7 @@ class CustomTextButton extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
+
                   if (icon == true) ...[
                     const SizedBox(width: 6),
                     const Icon(Icons.arrow_forward_outlined),
