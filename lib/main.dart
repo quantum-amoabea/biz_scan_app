@@ -1,4 +1,5 @@
 import 'package:biz_scan_app/view_models/camera_provider.dart';
+import 'package:biz_scan_app/view_models/contacts_provider.dart';
 import 'package:biz_scan_app/view_models/login_provider.dart';
 import 'package:biz_scan_app/view_models/scan_provider.dart';
 import 'package:biz_scan_app/views/login_screen.dart';
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => CameraProvider()),
         ChangeNotifierProvider(create: (_) => LoginProvider()),
         ChangeNotifierProvider(create: (_) => ScanProvider()),
+        ChangeNotifierProvider(create: (_) => ContactsProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

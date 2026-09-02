@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:biz_scan_app/models/scan_card.dart';
+import 'package:biz_scan_app/utils/scanned_card_mapper.dart';
 import 'package:biz_scan_app/view_models/camera_provider.dart';
 import 'package:biz_scan_app/view_models/scan_provider.dart';
 import 'package:biz_scan_app/views/contact_details_screen.dart';
@@ -208,7 +209,7 @@ class _ReviewContactScreenState extends State<ReviewContactScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => ContactDetailsScreen(),
+                                  builder: (context) => ContactDetailsScreen(contact: scanProvider.scannedCardDetails!.toContactDetails(), isScannedContact: true,),
                                 ),
                               );
                             }

@@ -1,12 +1,17 @@
 import 'dart:io';
 
 import 'package:biz_scan_app/core/colors.dart';
+import 'package:biz_scan_app/utils/contact_mapper.dart';
 import 'package:biz_scan_app/view_models/camera_provider.dart';
+import 'package:biz_scan_app/view_models/contacts_provider.dart';
 import 'package:biz_scan_app/views/contact_details_screen.dart';
 import 'package:biz_scan_app/widgets/custom_app_bar.dart';
 import 'package:biz_scan_app/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '../models/contacts.dart';
+import '../widgets/contacts_shimmer.dart';
 
 class ContactScreen extends StatelessWidget {
   const ContactScreen({super.key});
@@ -30,7 +35,10 @@ class ContactScreen extends StatelessWidget {
                   children: [
                     const Text(
                       "Contacts",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
                     ),
                     Row(
                       children: [
@@ -41,13 +49,13 @@ class ContactScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-          
+
                 // Search
                 const CustomTextField(
                   suffixIcon: Icon(Icons.search),
                   hintText: "Search names, companies, job titles",
                 ),
-          
+
                 // Tabs
                 TabBar(
                   labelColor: BaseColors().primaryColor,
@@ -59,12 +67,17 @@ class ContactScreen extends StatelessWidget {
                     Tab(text: 'Shared with Me'),
                   ],
                 ),
-          
+
                 const SizedBox(height: 10),
-          
+
                 // Tab content
                 Expanded(
-                  child: TabBarView(children: [_contactList(), _contactList()]),
+                  child: TabBarView(
+                    children: [
+                      _contactList(context),
+                      _sharedContactList(context),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -74,18 +87,59 @@ class ContactScreen extends StatelessWidget {
     );
   }
 
-  Widget _contactList() {
+  Widget _contactList(BuildContext context) {
+    final contactsProvider = context.watch<ContactsProvider>();
+
+    if (contactsProvider.isFetchingContacts) {
+      return ListView.builder(
+        itemCount: 5,
+        itemBuilder: (context, index) {
+          return const ContactDetailsCardShimmer();
+        },
+      );
+    }
+
     return ListView.builder(
-      itemCount: 10,
+      itemCount: contactsProvider.contacts.length,
       itemBuilder: (context, index) {
-        return const ContactDetailsCard();
+        final contact = contactsProvider.contacts[index];
+
+        return ContactDetailsCard(
+          contacts: contact,
+        );
+      },
+    );
+  }
+
+  Widget _sharedContactList(BuildContext context) {
+    final contactsProvider = context.watch<ContactsProvider>();
+
+    if (contactsProvider.isFetchingSharedContacts) {
+      return ListView.builder(
+        itemCount: 5,
+        itemBuilder: (context, index) {
+          return const ContactDetailsCardShimmer();
+        },
+      );
+    }
+
+    return ListView.builder(
+      itemCount: contactsProvider.sharedContacts.length,
+      itemBuilder: (context, index) {
+        final contact = contactsProvider.sharedContacts[index];
+
+        return ContactDetailsCard(
+          contacts: contact,
+        );
       },
     );
   }
 }
 
 class ContactDetailsCard extends StatelessWidget {
-  const ContactDetailsCard({super.key});
+  final Items contacts;
+
+  const ContactDetailsCard({super.key, required this.contacts});
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +149,10 @@ class ContactDetailsCard extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => ContactDetailsScreen()),
+          MaterialPageRoute(
+            builder: (context) =>
+                ContactDetailsScreen(contact: contacts.toContactDetails()),
+          ),
         );
       },
       child: Container(
@@ -134,19 +191,28 @@ class ContactDetailsCard extends StatelessWidget {
 
             const SizedBox(width: 20),
 
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'ASHISH Nyame',
-                  style: TextStyle(
-                    color: BaseColors().primaryColor,
-                    fontWeight: FontWeight.bold,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    contacts.fullName ?? '',
+                    style: TextStyle(
+                      color: BaseColors().primaryColor,
+                      fontWeight: FontWeight.bold,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                ),
-                const Text('AVP-Business Evangelist'),
-                const Text('Protectt.ai Lab Pvt.Ltd'),
-              ],
+                  Text(
+                    contacts.jobTitle ?? '',
+                    style: TextStyle(overflow: TextOverflow.ellipsis),
+                  ),
+                  Text(
+                    contacts.company ?? '',
+                    style: TextStyle(overflow: TextOverflow.ellipsis),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
