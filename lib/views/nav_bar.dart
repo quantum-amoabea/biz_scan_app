@@ -42,20 +42,11 @@ class _NavBarState extends State<NavBar> {
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      switch (_selectedIndex) {
-        case 0:
-          break;
-
-        case 1:
-          break;
-
-        case 2:
-          final contactProvider = context.read<ContactsProvider>();
-          await contactProvider.getContacts();
-          await contactProvider.getSharedContacts();
-          break;
-      }
+      final contactProvider = context.read<ContactsProvider>();
+      await contactProvider.getContacts();
+      await contactProvider.getSharedContacts();
     });
+
     return Scaffold(
       body: IndexedStack(index: _selectedIndex, children: _screens),
 

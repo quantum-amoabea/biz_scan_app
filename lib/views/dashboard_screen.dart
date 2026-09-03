@@ -1,11 +1,15 @@
 import 'package:biz_scan_app/core/colors.dart';
 import 'package:biz_scan_app/core/offline/prefs_manager.dart';
+import 'package:biz_scan_app/view_models/contacts_provider.dart';
 import 'package:biz_scan_app/views/merge_contact_screen.dart';
 import 'package:biz_scan_app/widgets/custom_textbutton.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../widgets/contacts_shimmer.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/dash_stat_card.dart';
+import 'contact_screen.dart';
 import 'nav_bar.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -13,6 +17,9 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final contactProvider = context.watch<ContactsProvider>();
+    final contacts = contactProvider.contacts.take(3).toList();
+
     return Scaffold(
       backgroundColor: BaseColors().whiteColor,
       appBar: CustomAppBar(),
@@ -24,7 +31,10 @@ class DashboardScreen extends StatelessWidget {
             children: [
               Text(
                 'Welcome, ${PrefsManager().getUser()?.displayName ?? 'User'}',
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
               ),
 
               const SizedBox(height: 20),
@@ -63,7 +73,7 @@ class DashboardScreen extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Text(
-                                    '1,248',
+                                    contactProvider.contacts.length.toString(),
                                     style: TextStyle(
                                       color: BaseColors().whiteColor,
                                       fontSize: 24,
@@ -74,7 +84,7 @@ class DashboardScreen extends StatelessWidget {
                                   const SizedBox(width: 10),
 
                                   Text(
-                                    '+24',
+                                    contactProvider.scannedThisWeek.toString(),
                                     style: TextStyle(
                                       fontSize: 16,
                                       color: BaseColors().whiteColor,
@@ -130,9 +140,7 @@ class DashboardScreen extends StatelessWidget {
                       value: '0',
                       title: 'Awaiting Review',
                       icon: Icons.event_note_outlined,
-                      onTap: (){
-
-                      },
+                      onTap: () {},
                     ),
                   ),
 
@@ -143,8 +151,13 @@ class DashboardScreen extends StatelessWidget {
                       value: '0',
                       title: 'Possible Duplicates',
                       icon: Icons.copy,
-                      onTap: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=> MergeContactScreen()));
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MergeContactScreen(),
+                          ),
+                        );
                       },
                     ),
                   ),
@@ -163,72 +176,109 @@ class DashboardScreen extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Row(
-                    children: [
-                      Text(
-                        "View All",
-                        style: TextStyle(
-                          color: BaseColors().primaryColor,
-                          fontWeight: FontWeight.bold,
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const NavBar(initialIndex: 2),
                         ),
-                      ),
-                      Icon(
-                        Icons.arrow_forward_outlined,
-                        color: BaseColors().primaryColor,
-                      ),
-                    ],
+                        (route) => false,
+                      );
+                    },
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "View All",
+                          style: TextStyle(
+                            color: BaseColors().primaryColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(
+                          Icons.arrow_forward_outlined,
+                          color: BaseColors().primaryColor,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
 
               SizedBox(height: 20),
 
-              Center(
-                child: Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.all(30),
-                  decoration: BoxDecoration(
-                    color: BaseColors().whiteColor,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: BaseColors().greyColor,
-                        blurRadius: 1,
-                        offset: const Offset(0, 1),
+              contactProvider.isFetchingContacts
+                  ? SizedBox(
+                      height: 300,
+                      child: ListView.builder(
+                        itemCount: 3,
+                        itemBuilder: (context, index) {
+                          return const ContactDetailsCardShimmer();
+                        },
                       ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.contact_mail_outlined,
-                        color: BaseColors().greyColor,
-                        size: 35,
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        "No cards scanned yet",
-                        style: TextStyle(color: BaseColors().greyColor),
-                      ),
-                      SizedBox(height: 10),
-                      CustomTextButton(
-                        text: 'Scan your first card',
-                        borderRadius: 26,
-                        onPressed: () {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  const NavBar(initialIndex: 1),
+                    )
+                  : contactProvider.contacts.isEmpty
+                  ? Center(
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(30),
+                        decoration: BoxDecoration(
+                          color: BaseColors().whiteColor,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: BaseColors().greyColor,
+                              blurRadius: 1,
+                              offset: const Offset(0, 1),
                             ),
-                            (route) => false,
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.contact_mail_outlined,
+                              color: BaseColors().greyColor,
+                              size: 35,
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              "No cards scanned yet",
+                              style: TextStyle(color: BaseColors().greyColor),
+                            ),
+                            const SizedBox(height: 10),
+                            CustomTextButton(
+                              text: 'Scan your first card',
+                              borderRadius: 26,
+                              onPressed: () {
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const NavBar(initialIndex: 1),
+                                  ),
+                                  (route) => false,
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : SizedBox(
+                      height: 200,
+                      child: ListView.builder(
+                        itemCount: contactProvider.contacts.length > 3
+                            ? 3
+                            : contactProvider.contacts.length,
+                        itemBuilder: (context, index) {
+                          return ContactDetailsCard(
+                            contacts: contactProvider.contacts[index],
                           );
                         },
                       ),
-                    ],
-                  ),
-                ),
-              ),
+                    ),
             ],
           ),
         ),

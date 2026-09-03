@@ -14,6 +14,19 @@ class ContactsProvider extends ChangeNotifier {
   bool isFetchingSharedContacts = false;
 
 
+  int get scannedThisWeek {
+    final cutoff = DateTime.now().subtract(
+      const Duration(days: 7),
+    );
+
+    return contacts.where((item) {
+      final createdAt = DateTime.tryParse(item.createdAt ?? '');
+
+      return createdAt != null && !createdAt.isBefore(cutoff);
+    }).length;
+  }
+
+
   Future<void> getContacts() async {
     isFetchingContacts = true;
     notifyListeners();
