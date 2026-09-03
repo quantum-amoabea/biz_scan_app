@@ -28,11 +28,6 @@ class _ReviewContactScreenState extends State<ReviewContactScreen> {
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final scanProvider = context.read<ScanProvider>();
-
-      scanProvider.getCountries();
-    });
   }
 
   @override

@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../core/colors.dart';
 import '../core/size_config.dart';
 import '../view_models/contacts_provider.dart';
+import '../view_models/scan_provider.dart';
 
 class NavBar extends StatefulWidget {
   final int initialIndex;
@@ -43,8 +44,11 @@ class _NavBarState extends State<NavBar> {
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final contactProvider = context.read<ContactsProvider>();
+      final scanProvider = context.read<ScanProvider>();
+
       await contactProvider.getContacts();
       await contactProvider.getSharedContacts();
+      await scanProvider.getCountries();
     });
 
     return Scaffold(
