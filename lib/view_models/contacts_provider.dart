@@ -9,15 +9,14 @@ class ContactsProvider extends ChangeNotifier {
 
   List<Items> contacts = [];
   List<Items> sharedContacts = [];
+  List<Items> filterContacts = [];
 
   bool isFetchingContacts = false;
   bool isFetchingSharedContacts = false;
-
+  bool isFetchingFilteredContacts = false;
 
   int get scannedThisWeek {
-    final cutoff = DateTime.now().subtract(
-      const Duration(days: 7),
-    );
+    final cutoff = DateTime.now().subtract(const Duration(days: 7));
 
     return contacts.where((item) {
       final createdAt = DateTime.tryParse(item.createdAt ?? '');
@@ -25,7 +24,6 @@ class ContactsProvider extends ChangeNotifier {
       return createdAt != null && !createdAt.isBefore(cutoff);
     }).length;
   }
-
 
   Future<void> getContacts() async {
     isFetchingContacts = true;
@@ -46,6 +44,36 @@ class ContactsProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> getFilteredContacts(String search) async {
+    if (search.trim().isEmpty) {
+      await getContacts();
+      return;
+    }
+
+    isFetchingFilteredContacts = true;
+    notifyListeners();
+
+    try {
+      final response = await _dioClient.get(
+        'api/v1/contacts',
+        {'q': search.trim()},
+      );
+
+      final items = Contacts.fromJson(response.data);
+
+      filterContacts = items.items ?? [];
+
+      debugPrint('The filtered contacts are $filterContacts');
+    } catch (e) {
+      debugPrint('The error is $e');
+      showToast(message: e.toString());
+    } finally {
+      isFetchingFilteredContacts = false;
+      notifyListeners();
+    }
+  }
+
 
   Future<void> getSharedContacts() async {
     isFetchingSharedContacts = true;

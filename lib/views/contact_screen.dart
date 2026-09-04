@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:biz_scan_app/core/colors.dart';
-import 'package:biz_scan_app/utils/contact_mapper.dart';
 import 'package:biz_scan_app/view_models/camera_provider.dart';
 import 'package:biz_scan_app/view_models/contacts_provider.dart';
 import 'package:biz_scan_app/views/contact_details_screen.dart';
@@ -11,10 +10,24 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../models/contacts.dart';
+import '../utils/contact_mapper.dart';
 import '../widgets/contacts_shimmer.dart';
 
-class ContactScreen extends StatelessWidget {
+class ContactScreen extends StatefulWidget {
   const ContactScreen({super.key});
+
+  @override
+  State<ContactScreen> createState() => _ContactScreenState();
+}
+
+class _ContactScreenState extends State<ContactScreen> {
+  final TextEditingController searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +38,11 @@ class ContactScreen extends StatelessWidget {
         appBar: const CustomAppBar(),
         body: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
+            padding: const EdgeInsets.only(
+              left: 20,
+              right: 20,
+              top: 20,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -51,9 +68,15 @@ class ContactScreen extends StatelessWidget {
                 ),
 
                 // Search
-                const CustomTextField(
-                  suffixIcon: Icon(Icons.search),
+                CustomTextField(
+                  suffixIcon: const Icon(Icons.search),
+                  controller: searchController,
                   hintText: "Search names, companies, job titles",
+                  onChanged: (value) {
+                    context
+                        .read<ContactsProvider>()
+                        .getFilteredContacts(value);
+                  },
                 ),
 
                 // Tabs
@@ -90,7 +113,11 @@ class ContactScreen extends StatelessWidget {
   Widget _contactList(BuildContext context) {
     final contactsProvider = context.watch<ContactsProvider>();
 
-    if (contactsProvider.isFetchingContacts) {
+    final bool isSearching = searchController.text.trim().isNotEmpty;
+
+    // Loading search
+    if (isSearching &&
+        contactsProvider.isFetchingFilteredContacts) {
       return ListView.builder(
         itemCount: 5,
         itemBuilder: (context, index) {
@@ -99,10 +126,26 @@ class ContactScreen extends StatelessWidget {
       );
     }
 
+    // Loading initial/all contacts
+    if (!isSearching &&
+        contactsProvider.isFetchingContacts) {
+      return ListView.builder(
+        itemCount: 5,
+        itemBuilder: (context, index) {
+          return const ContactDetailsCardShimmer();
+        },
+      );
+    }
+
+    // Decide which list to display
+    final List<Items> contacts = isSearching
+        ? contactsProvider.filterContacts
+        : contactsProvider.contacts;
+
     return ListView.builder(
-      itemCount: contactsProvider.contacts.length,
+      itemCount: contacts.length,
       itemBuilder: (context, index) {
-        final contact = contactsProvider.contacts[index];
+        final contact = contacts[index];
 
         return ContactDetailsCard(
           contacts: contact,
@@ -139,7 +182,10 @@ class ContactScreen extends StatelessWidget {
 class ContactDetailsCard extends StatelessWidget {
   final Items contacts;
 
-  const ContactDetailsCard({super.key, required this.contacts});
+  const ContactDetailsCard({
+    super.key,
+    required this.contacts,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -150,13 +196,17 @@ class ContactDetailsCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                ContactDetailsScreen(contact: contacts.toContactDetails()),
+            builder: (context) => ContactDetailsScreen(
+              contact: contacts.toContactDetails(),
+            ),
           ),
         );
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+        margin: const EdgeInsets.symmetric(
+          vertical: 10,
+          horizontal: 5,
+        ),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: BaseColors().whiteColor,
@@ -186,7 +236,10 @@ class ContactDetailsCard extends StatelessWidget {
                         fit: BoxFit.cover,
                       ),
                     )
-                  : Icon(Icons.person, color: BaseColors().whiteColor),
+                  : Icon(
+                      Icons.person,
+                      color: BaseColors().whiteColor,
+                    ),
             ),
 
             const SizedBox(width: 20),
@@ -205,11 +258,15 @@ class ContactDetailsCard extends StatelessWidget {
                   ),
                   Text(
                     contacts.jobTitle ?? '',
-                    style: TextStyle(overflow: TextOverflow.ellipsis),
+                    style: const TextStyle(
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                   Text(
                     contacts.company ?? '',
-                    style: TextStyle(overflow: TextOverflow.ellipsis),
+                    style: const TextStyle(
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ),
