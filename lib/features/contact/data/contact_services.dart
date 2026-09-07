@@ -65,3 +65,20 @@ Future<void> saveToPhoneBook() async {
     showToast(message: "Could not save phonebook");
   }
 }
+
+bool isAlphabet(String char) {
+  return RegExp(r'^[a-zA-Z]$').hasMatch(char);
+}
+
+String getContactInitials(String user) {
+  String initials = '';
+  List<String> list = user.trim().split(' ');
+
+  for (String word in list) {
+    if (word.isNotEmpty && isAlphabet(word[0])) {
+      initials += word[0].toUpperCase();
+    }
+  }
+
+  return initials;
+}

@@ -103,6 +103,7 @@ class NavBarIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ScreenSize().init(context);
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(

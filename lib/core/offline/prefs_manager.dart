@@ -22,7 +22,6 @@ class PrefsManager {
   final String emailKey = 'email';
   final String usernameKey = 'username';
   final String fullNameKey = 'full_name';
-  final String passwordKey = 'password';
   final String userIdKey = 'user_id';
   final String isLoginKey = 'isLogin';
   final String userKey = 'user';
@@ -74,13 +73,6 @@ class PrefsManager {
 
   Future<void> clearFullName() async => await _prefs?.remove(fullNameKey);
 
-  Future<void> setPassword(String password) async =>
-      await _prefs?.setString(passwordKey, password);
-
-  String getPassword() => _prefs?.getString(passwordKey) ?? "";
-
-  Future<void> clearPassword() async => await _prefs?.remove(passwordKey);
-
   Future<void> setIsLogin(bool isLogin) async =>
       await _prefs?.setBool(isLoginKey, isLogin);
 
@@ -119,4 +111,19 @@ class PrefsManager {
 
   String getDeviceFingerPrint() =>
       _prefs?.getString(deviceFingerPrintKey) ?? "";
+
+  Future<void> clearAll() async {
+    await _prefs?.remove(accessTokenKey);
+    await _prefs?.remove(refreshTokenKey);
+    await _prefs?.remove(emailKey);
+    await _prefs?.remove(usernameKey);
+    await _prefs?.remove(fullNameKey);
+    await _prefs?.remove(userIdKey);
+    await _prefs?.remove(isLoginKey);
+    await _prefs?.remove(userKey);
+  }
+
+  bool isAuthenticated() {
+    return getAccessToken().isNotEmpty && getRefreshToken().isNotEmpty;
+  }
 }

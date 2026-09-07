@@ -15,6 +15,7 @@ class DioClient {
   factory DioClient() => _instance;
 
   static late Dio _dio;
+  static late Dio _refreshDio;
 
   DioClient.internal();
 
@@ -35,7 +36,18 @@ class DioClient {
       tokenInterceptor,
       AwesomeDioInterceptor(logger: print),
     ]);
+
+    _refreshDio = Dio(
+      BaseOptions(
+        baseUrl: "$serverUrl/business-card/",
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 30),
+        sendTimeout: const Duration(seconds: 30),
+      ),
+    );
   }
+
+  static Dio get refreshDio => _refreshDio;
 
   // get endpoint
   Future get(

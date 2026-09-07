@@ -40,6 +40,7 @@ class CustomTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ScreenSize().init(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

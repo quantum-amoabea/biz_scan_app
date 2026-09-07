@@ -35,9 +35,14 @@ class CustomDialog extends StatelessWidget {
             ),
           ),
         ),
-        CustomTextButton(
-          text: confirmText,
+        TextButton(
           onPressed: onConfirm ?? () => Navigator.pop(context),
+          child:  Text(
+            confirmText,
+            style: TextStyle(
+              color: BaseColors().primaryColor,
+            ),
+          ),
         ),
       ],
     );

@@ -1,17 +1,16 @@
-import 'dart:io';
-
 import 'package:biz_scan_app/core/colors.dart';
-import 'package:biz_scan_app/features/scan/viewmodels/camera_viewmodel.dart';
-import 'package:biz_scan_app/features/contact/viewmodels/contacts_viewmodel.dart';
 import 'package:biz_scan_app/features/contact/presentation/screens/contact_details_screen.dart';
+import 'package:biz_scan_app/features/contact/viewmodels/contacts_viewmodel.dart';
+import 'package:biz_scan_app/features/scan/viewmodels/camera_viewmodel.dart';
 import 'package:biz_scan_app/widgets/custom_app_bar.dart';
 import 'package:biz_scan_app/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../domain/models/contacts.dart';
 import '../../../../utils/contact_mapper.dart';
 import '../../../../widgets/contacts_shimmer.dart';
+import '../../data/contact_services.dart';
+import '../../domain/models/contacts.dart';
 
 class ContactScreen extends StatefulWidget {
   const ContactScreen({super.key});
@@ -134,7 +133,9 @@ class _ContactScreenState extends State<ContactScreen> {
                       : ListView.builder(
                           itemCount: contacts.length,
                           itemBuilder: (context, index) {
-                            return ContactDetailsCard(contacts: contacts[index]);
+                            return ContactDetailsCard(
+                              contacts: contacts[index],
+                            );
                           },
                         )
                 : contactsProvider.isFetchingContacts
@@ -157,67 +158,64 @@ class _ContactScreenState extends State<ContactScreen> {
   }
 
   Widget _sharedContactList(BuildContext context) {
-  final contactsProvider = context.watch<ContactsViewModel>();
+    final contactsProvider = context.watch<ContactsViewModel>();
 
-  final bool isSearching =
-      sharedSearchController.text.trim().isNotEmpty;
+    final bool isSearching = sharedSearchController.text.trim().isNotEmpty;
 
-  final List<Items> contacts = isSearching
-      ? contactsProvider.filteredSharedContacts
-      : contactsProvider.sharedContacts;
+    final List<Items> contacts = isSearching
+        ? contactsProvider.filteredSharedContacts
+        : contactsProvider.sharedContacts;
 
-  return Padding(
-    padding: const EdgeInsets.all(8.0),
-    child: Column(
-      children: [
-        CustomTextField(
-          suffixIcon: const Icon(Icons.search),
-          controller: sharedSearchController,
-          hintText: "Search names, companies, job titles",
-          onChanged: (value) {
-            context
-                .read<ContactsViewModel>()
-                .getFilteredSharedContacts(value);
-          },
-        ),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          CustomTextField(
+            suffixIcon: const Icon(Icons.search),
+            controller: sharedSearchController,
+            hintText: "Search names, companies, job titles",
+            onChanged: (value) {
+              context.read<ContactsViewModel>().getFilteredSharedContacts(
+                value,
+              );
+            },
+          ),
 
-        Expanded(
-          child: isSearching
-              ? contactsProvider.isFetchingFilteredSharedContacts
-                  ? ListView.builder(
-                      itemCount: 5,
-                      itemBuilder: (context, index) {
-                        return const ContactDetailsCardShimmer();
-                      },
-                    )
-                  : ListView.builder(
-                      itemCount: contacts.length,
-                      itemBuilder: (context, index) {
-                        return ContactDetailsCard(
-                          contacts: contacts[index],
-                        );
-                      },
-                    )
-              : contactsProvider.isFetchingSharedContacts
-                  ? ListView.builder(
-                      itemCount: 5,
-                      itemBuilder: (context, index) {
-                        return const ContactDetailsCardShimmer();
-                      },
-                    )
-                  : ListView.builder(
-                      itemCount: contacts.length,
-                      itemBuilder: (context, index) {
-                        return ContactDetailsCard(
-                          contacts: contacts[index],
-                        );
-                      },
-                    ),
-        ),
-      ],
-    ),
-  );
-}
+          Expanded(
+            child: isSearching
+                ? contactsProvider.isFetchingFilteredSharedContacts
+                      ? ListView.builder(
+                          itemCount: 5,
+                          itemBuilder: (context, index) {
+                            return const ContactDetailsCardShimmer();
+                          },
+                        )
+                      : ListView.builder(
+                          itemCount: contacts.length,
+                          itemBuilder: (context, index) {
+                            return ContactDetailsCard(
+                              contacts: contacts[index],
+                            );
+                          },
+                        )
+                : contactsProvider.isFetchingSharedContacts
+                ? ListView.builder(
+                    itemCount: 5,
+                    itemBuilder: (context, index) {
+                      return const ContactDetailsCardShimmer();
+                    },
+                  )
+                : ListView.builder(
+                    itemCount: contacts.length,
+                    itemBuilder: (context, index) {
+                      return ContactDetailsCard(contacts: contacts[index]);
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class ContactDetailsCard extends StatelessWidget {
@@ -259,18 +257,18 @@ class ContactDetailsCard extends StatelessWidget {
               width: 50,
               height: 50,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(25),
-                color: BaseColors().greyColor,
+                shape: BoxShape.circle,
+                color: BaseColors().primaryColor,
               ),
-              child: cameraProvider.frontImage != null
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(50),
-                      child: Image.file(
-                        File(cameraProvider.frontImage!.path),
-                        fit: BoxFit.cover,
-                      ),
-                    )
-                  : Icon(Icons.person, color: BaseColors().whiteColor),
+              alignment: Alignment.center,
+              child: Text(
+                getContactInitials(contacts.fullName ?? ""),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: BaseColors().whiteColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
 
             const SizedBox(width: 20),

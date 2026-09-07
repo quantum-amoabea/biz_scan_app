@@ -25,6 +25,8 @@ class LoginViewModel extends ChangeNotifier {
       prefsManager.setAccessToken(loginUserResponse?.accessToken ?? '');
       prefsManager.setRefreshToken(loginUserResponse?.refreshToken ?? "");
       prefsManager.setUser(loginUserResponse?.user ?? User());
+      prefsManager.setIsLogin(true);
+
 
       debugPrint('the user is $loginUserResponse');
     } finally {

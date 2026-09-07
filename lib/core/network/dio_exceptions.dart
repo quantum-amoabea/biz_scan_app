@@ -49,9 +49,9 @@ class DioExceptions implements Exception {
  String _handleError(int? statusCode, dynamic error) {
     switch (statusCode) {
       case 400:
-        debugPrint("Details: ${error['detail']}");
-        return error['detail'] != null && error['detail'].contains("Invalid")
-            ? error['detail']
+        debugPrint("Details: ${error['error_message']}");
+        return error['error_message'] != null && error['error_message'].contains("Invalid")
+            ? error['error_message']
             : 'Oops, something went wrong with your request. Please check your input and try again.';
       case 401:
         return error['error_message'];

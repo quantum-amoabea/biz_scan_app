@@ -31,6 +31,7 @@ class CustomTextButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ScreenSize().init(context);
     final radius = BorderRadius.circular(
       borderRadius ?? getProportionateScreenHeight(10),
     );
