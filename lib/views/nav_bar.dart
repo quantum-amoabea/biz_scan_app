@@ -107,7 +107,7 @@ class NavBarIcon extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 40),
+        padding:  EdgeInsets.symmetric(horizontal: getProportionateScreenWidth(20)),
         decoration: BoxDecoration(
           color: isSelected
               ? BaseColors().primaryColor.withValues(alpha: 0.3)

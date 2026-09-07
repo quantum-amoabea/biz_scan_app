@@ -10,7 +10,9 @@ class ContactsProvider extends ChangeNotifier {
   List<Items> contacts = [];
   List<Items> sharedContacts = [];
   List<Items> filterContacts = [];
+  List<Items> filteredSharedContacts = [];
 
+  bool isFetchingFilteredSharedContacts = false;
   bool isFetchingContacts = false;
   bool isFetchingSharedContacts = false;
   bool isFetchingFilteredContacts = false;
@@ -55,10 +57,9 @@ class ContactsProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _dioClient.get(
-        'api/v1/contacts',
-        {'q': search.trim()},
-      );
+      final response = await _dioClient.get('api/v1/contacts', {
+        'q': search.trim(),
+      });
 
       final items = Contacts.fromJson(response.data);
 
@@ -73,7 +74,6 @@ class ContactsProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-
 
   Future<void> getSharedContacts() async {
     isFetchingSharedContacts = true;
@@ -91,6 +91,34 @@ class ContactsProvider extends ChangeNotifier {
       showToast(message: e.toString());
     } finally {
       isFetchingSharedContacts = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> getFilteredSharedContacts(String search) async {
+    if (search.trim().isEmpty) {
+      await getSharedContacts();
+      return;
+    }
+
+    isFetchingFilteredSharedContacts = true;
+    notifyListeners();
+
+    try {
+      final response = await _dioClient.get('api/v1/contacts/shared-with-me', {
+        'q': search.trim(),
+      });
+
+      final items = Contacts.fromJson(response.data);
+
+      filteredSharedContacts = items.items ?? [];
+
+      debugPrint('The filtered shared contacts are $filteredSharedContacts');
+    } catch (e) {
+      debugPrint('The error is $e');
+      showToast(message: e.toString());
+    } finally {
+      isFetchingFilteredSharedContacts = false;
       notifyListeners();
     }
   }

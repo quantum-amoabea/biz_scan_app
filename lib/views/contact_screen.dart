@@ -22,10 +22,12 @@ class ContactScreen extends StatefulWidget {
 
 class _ContactScreenState extends State<ContactScreen> {
   final TextEditingController searchController = TextEditingController();
+  final TextEditingController sharedSearchController = TextEditingController();
 
   @override
   void dispose() {
     searchController.dispose();
+    sharedSearchController.dispose();
     super.dispose();
   }
 
@@ -38,11 +40,7 @@ class _ContactScreenState extends State<ContactScreen> {
         appBar: const CustomAppBar(),
         body: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.only(
-              left: 20,
-              right: 20,
-              top: 20,
-            ),
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -67,17 +65,9 @@ class _ContactScreenState extends State<ContactScreen> {
                   ],
                 ),
 
+                SizedBox(height: 20),
+
                 // Search
-                CustomTextField(
-                  suffixIcon: const Icon(Icons.search),
-                  controller: searchController,
-                  hintText: "Search names, companies, job titles",
-                  onChanged: (value) {
-                    context
-                        .read<ContactsProvider>()
-                        .getFilteredContacts(value);
-                  },
-                ),
 
                 // Tabs
                 TabBar(
@@ -115,77 +105,125 @@ class _ContactScreenState extends State<ContactScreen> {
 
     final bool isSearching = searchController.text.trim().isNotEmpty;
 
-    // Loading search
-    if (isSearching &&
-        contactsProvider.isFetchingFilteredContacts) {
-      return ListView.builder(
-        itemCount: 5,
-        itemBuilder: (context, index) {
-          return const ContactDetailsCardShimmer();
-        },
-      );
-    }
-
-    // Loading initial/all contacts
-    if (!isSearching &&
-        contactsProvider.isFetchingContacts) {
-      return ListView.builder(
-        itemCount: 5,
-        itemBuilder: (context, index) {
-          return const ContactDetailsCardShimmer();
-        },
-      );
-    }
-
-    // Decide which list to display
     final List<Items> contacts = isSearching
         ? contactsProvider.filterContacts
         : contactsProvider.contacts;
 
-    return ListView.builder(
-      itemCount: contacts.length,
-      itemBuilder: (context, index) {
-        final contact = contacts[index];
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          CustomTextField(
+            suffixIcon: const Icon(Icons.search),
+            controller: searchController,
+            hintText: "Search names, companies, job titles",
+            onChanged: (value) {
+              context.read<ContactsProvider>().getFilteredContacts(value);
+            },
+          ),
 
-        return ContactDetailsCard(
-          contacts: contact,
-        );
-      },
+          Expanded(
+            child: isSearching
+                ? contactsProvider.isFetchingFilteredContacts
+                      ? ListView.builder(
+                          itemCount: 5,
+                          itemBuilder: (context, index) {
+                            return const ContactDetailsCardShimmer();
+                          },
+                        )
+                      : ListView.builder(
+                          itemCount: contacts.length,
+                          itemBuilder: (context, index) {
+                            return ContactDetailsCard(contacts: contacts[index]);
+                          },
+                        )
+                : contactsProvider.isFetchingContacts
+                ? ListView.builder(
+                    itemCount: 5,
+                    itemBuilder: (context, index) {
+                      return const ContactDetailsCardShimmer();
+                    },
+                  )
+                : ListView.builder(
+                    itemCount: contacts.length,
+                    itemBuilder: (context, index) {
+                      return ContactDetailsCard(contacts: contacts[index]);
+                    },
+                  ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _sharedContactList(BuildContext context) {
-    final contactsProvider = context.watch<ContactsProvider>();
+  final contactsProvider = context.watch<ContactsProvider>();
 
-    if (contactsProvider.isFetchingSharedContacts) {
-      return ListView.builder(
-        itemCount: 5,
-        itemBuilder: (context, index) {
-          return const ContactDetailsCardShimmer();
-        },
-      );
-    }
+  final bool isSearching =
+      sharedSearchController.text.trim().isNotEmpty;
 
-    return ListView.builder(
-      itemCount: contactsProvider.sharedContacts.length,
-      itemBuilder: (context, index) {
-        final contact = contactsProvider.sharedContacts[index];
+  final List<Items> contacts = isSearching
+      ? contactsProvider.filteredSharedContacts
+      : contactsProvider.sharedContacts;
 
-        return ContactDetailsCard(
-          contacts: contact,
-        );
-      },
-    );
-  }
+  return Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: Column(
+      children: [
+        CustomTextField(
+          suffixIcon: const Icon(Icons.search),
+          controller: sharedSearchController,
+          hintText: "Search names, companies, job titles",
+          onChanged: (value) {
+            context
+                .read<ContactsProvider>()
+                .getFilteredSharedContacts(value);
+          },
+        ),
+
+        Expanded(
+          child: isSearching
+              ? contactsProvider.isFetchingFilteredSharedContacts
+                  ? ListView.builder(
+                      itemCount: 5,
+                      itemBuilder: (context, index) {
+                        return const ContactDetailsCardShimmer();
+                      },
+                    )
+                  : ListView.builder(
+                      itemCount: contacts.length,
+                      itemBuilder: (context, index) {
+                        return ContactDetailsCard(
+                          contacts: contacts[index],
+                        );
+                      },
+                    )
+              : contactsProvider.isFetchingSharedContacts
+                  ? ListView.builder(
+                      itemCount: 5,
+                      itemBuilder: (context, index) {
+                        return const ContactDetailsCardShimmer();
+                      },
+                    )
+                  : ListView.builder(
+                      itemCount: contacts.length,
+                      itemBuilder: (context, index) {
+                        return ContactDetailsCard(
+                          contacts: contacts[index],
+                        );
+                      },
+                    ),
+        ),
+      ],
+    ),
+  );
+}
 }
 
 class ContactDetailsCard extends StatelessWidget {
   final Items contacts;
 
-  const ContactDetailsCard({
-    super.key,
-    required this.contacts,
-  });
+  const ContactDetailsCard({super.key, required this.contacts});
 
   @override
   Widget build(BuildContext context) {
@@ -196,17 +234,13 @@ class ContactDetailsCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ContactDetailsScreen(
-              contact: contacts.toContactDetails(),
-            ),
+            builder: (context) =>
+                ContactDetailsScreen(contact: contacts.toContactDetails()),
           ),
         );
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(
-          vertical: 10,
-          horizontal: 5,
-        ),
+        margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: BaseColors().whiteColor,
@@ -236,10 +270,7 @@ class ContactDetailsCard extends StatelessWidget {
                         fit: BoxFit.cover,
                       ),
                     )
-                  : Icon(
-                      Icons.person,
-                      color: BaseColors().whiteColor,
-                    ),
+                  : Icon(Icons.person, color: BaseColors().whiteColor),
             ),
 
             const SizedBox(width: 20),
@@ -258,15 +289,11 @@ class ContactDetailsCard extends StatelessWidget {
                   ),
                   Text(
                     contacts.jobTitle ?? '',
-                    style: const TextStyle(
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    style: const TextStyle(overflow: TextOverflow.ellipsis),
                   ),
                   Text(
                     contacts.company ?? '',
-                    style: const TextStyle(
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    style: const TextStyle(overflow: TextOverflow.ellipsis),
                   ),
                 ],
               ),
