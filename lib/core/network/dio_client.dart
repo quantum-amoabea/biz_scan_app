@@ -109,9 +109,7 @@ class DioClient {
     Map<String, dynamic>? headers,
   }) async {
     try {
-      if (data is Map<String, dynamic>) {
-        data = json.encode(data);
-      }
+
 
       Options options = Options(headers: headers);
       final response = await _dio.patch(endpoint, data: data, options: options);

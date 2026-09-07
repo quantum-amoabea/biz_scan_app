@@ -75,6 +75,7 @@ class _ContactDetailsCardState extends State<ContactDetailsCard> {
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
             'CONTACT DETAILS',
@@ -96,6 +97,10 @@ class _ContactDetailsCardState extends State<ContactDetailsCard> {
                 setState(() {
                   editingPhoneIndex = editingPhoneIndex == index ? null : index;
                 });
+
+              },
+              onDelete: (){
+
               },
             );
           }),
@@ -244,7 +249,9 @@ class _ContactDetailsCardState extends State<ContactDetailsCard> {
                   setState(() {
                     editingEmailIndex = editingEmailIndex == index ? null : index;
                   });
+
                 },
+                onDelete: (){},
               ),
             );
           }),
@@ -281,6 +288,7 @@ class _ContactDetailsCardState extends State<ContactDetailsCard> {
                 editingWebsite = !editingWebsite;
               });
             },
+            onDelete: (){},
           ),
           if (websiteController.text.isEmpty && !editingWebsite)
             AddFieldButton(

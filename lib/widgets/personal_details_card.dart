@@ -2,52 +2,40 @@ import 'package:biz_scan_app/core/colors.dart';
 import 'package:biz_scan_app/widgets/contact_detail_item.dart';
 import 'package:biz_scan_app/widgets/edit_field.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../features/contact/domain/models/contacts_details.dart';
+import '../features/contact/viewmodels/personal_details_viewmodel.dart';
 
-class PersonalDetailsCard extends StatefulWidget {
-  final ContactDetails contact;
+class PersonalDetailsCard extends StatelessWidget {
+  final PersonalDetailsViewModel viewModel;
 
-  const PersonalDetailsCard({super.key, required this.contact});
-
-  @override
-  State<PersonalDetailsCard> createState() => _PersonalDetailsCardState();
-}
-
-class _PersonalDetailsCardState extends State<PersonalDetailsCard> {
-  String? editingField;
-
-  late final TextEditingController nameController;
-  late final TextEditingController jobTitleController;
-  late final TextEditingController companyController;
-  late final TextEditingController industryController;
-
-  @override
-  void initState() {
-    super.initState();
-    nameController = TextEditingController(text: widget.contact.fullName);
-    jobTitleController = TextEditingController(text: widget.contact.jobTitle);
-    companyController = TextEditingController(text: widget.contact.company);
-    industryController = TextEditingController(text: widget.contact.industry);
-  }
-
-  @override
-  void dispose() {
-    nameController.dispose();
-    jobTitleController.dispose();
-    companyController.dispose();
-    industryController.dispose();
-    super.dispose();
-  }
-
-  void _toggleEdit(String field) {
-    setState(() {
-      editingField = editingField == field ? null : field;
-    });
-  }
+  const PersonalDetailsCard({super.key, required this.viewModel});
 
   @override
   Widget build(BuildContext context) {
+    return _PersonalDetailsCardContent(viewModel: viewModel);
+  }
+}
+
+class _PersonalDetailsCardContent extends StatelessWidget {
+  final PersonalDetailsViewModel viewModel;
+
+  const _PersonalDetailsCardContent({required this.viewModel});
+
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider.value(
+      value: viewModel,
+      child: _PersonalDetailsCardContentBody(),
+    );
+  }
+}
+
+class _PersonalDetailsCardContentBody extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final viewModel = context.watch<PersonalDetailsViewModel>();
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -63,98 +51,124 @@ class _PersonalDetailsCardState extends State<PersonalDetailsCard> {
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'PERSONAL DETAILS',
-            style: TextStyle(fontWeight: FontWeight.w600),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'PERSONAL DETAILS',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              GestureDetector(
+                onTap: viewModel.isSaving ? null : viewModel.toggleEdit,
+                child: Row(
+                  children: [
+                    Icon(
+                      viewModel.isEditing ? Icons.cancel : Icons.edit,
+                      color: BaseColors().primaryColor,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 2),
+                    Text(
+                      viewModel.isEditing ? 'Cancel' : 'Edit',
+                      style: TextStyle(color: BaseColors().primaryColor),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 15),
-          _PersonalField(
+          _Field(
             label: 'Full Name',
             icon: Icons.person,
-            controller: nameController,
-            isEditing: editingField == 'name',
-            onEdit: () => _toggleEdit('name'),
+            controller: viewModel.nameController,
+            isEditing: viewModel.isEditing,
+            error: viewModel.nameError,
           ),
           const SizedBox(height: 15),
-          _PersonalField(
+          _Field(
             label: 'Job Title',
             icon: Icons.work,
-            controller: jobTitleController,
-            isEditing: editingField == 'jobTitle',
-            onEdit: () => _toggleEdit('jobTitle'),
+            controller: viewModel.jobTitleController,
+            isEditing: viewModel.isEditing,
           ),
           const SizedBox(height: 15),
-          _PersonalField(
+          _Field(
             label: 'Company',
             icon: Icons.business,
-            controller: companyController,
-            isEditing: editingField == 'company',
-            onEdit: () => _toggleEdit('company'),
+            controller: viewModel.companyController,
+            isEditing: viewModel.isEditing,
           ),
           const SizedBox(height: 15),
-          _PersonalField(
-            label: 'Industry',
+          _IndustryField(
             icon: Icons.business_outlined,
-            controller: industryController,
-            isEditing: editingField == 'industry',
-            onEdit: () => _toggleEdit('industry'),
+            isEditing: viewModel.isEditing,
+            viewModel: viewModel,
           ),
+          if (viewModel.isEditing) ...[
+            const SizedBox(height: 15),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: viewModel.isSaving ? null : viewModel.save,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: BaseColors().primaryColor,
+                  foregroundColor: BaseColors().whiteColor,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: viewModel.isSaving
+                    ? SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation(BaseColors().whiteColor),
+                        ),
+                      )
+                    : const Text('Save Changes'),
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
 }
 
-class _PersonalField extends StatelessWidget {
+class _Field extends StatelessWidget {
   final String label;
   final IconData icon;
   final TextEditingController controller;
   final bool isEditing;
-  final VoidCallback onEdit;
+  final String? error;
 
-  const _PersonalField({
+  const _Field({
     required this.label,
     required this.icon,
     required this.controller,
     required this.isEditing,
-    required this.onEdit,
+    this.error,
   });
 
   @override
   Widget build(BuildContext context) {
     if (isEditing) {
-      return Row(
+      return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: BaseColors().primaryColor),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                GestureDetector(
-                  onTap: onEdit,
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.close,
-                        color: BaseColors().primaryColor,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Cancel',
-                        style: TextStyle(color: BaseColors().primaryColor),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 5),
-                EditField(label: label, controller: controller),
-              ],
+          EditField(label: label, controller: controller),
+          if (error != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              error!,
+              style:  TextStyle(color: BaseColors().primaryColor, fontSize: 12),
             ),
-          ),
+          ],
         ],
       );
     }
@@ -163,7 +177,75 @@ class _PersonalField extends StatelessWidget {
       icon: icon,
       label: label,
       value: controller.text.isNotEmpty ? controller.text : "N/A",
-      onEdit: onEdit,
+    );
+  }
+}
+
+class _IndustryField extends StatelessWidget {
+  final IconData icon;
+  final bool isEditing;
+  final PersonalDetailsViewModel viewModel;
+
+  const _IndustryField({
+    required this.icon,
+    required this.isEditing,
+    required this.viewModel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (isEditing) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Industry',
+            style: TextStyle(fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              border: Border.all(color: BaseColors().greyColor),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                dropdownColor: BaseColors().whiteColor,
+                value: viewModel.selectedIndustryCode?.isEmpty == true
+                    ? null
+                    : viewModel.selectedIndustryCode,
+                isExpanded: true,
+                hint: const Text('Select industry'),
+                items: viewModel.industries
+                    .where((i) => i.code.isNotEmpty)
+                    .map((industry) {
+                  return DropdownMenuItem<String>(
+                    value: industry.code,
+                    child: Text(
+                      industry.fullName.isNotEmpty ? industry.fullName : industry.name,
+                      style: TextStyle(fontWeight: FontWeight.w400),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  );
+                }).toList(),
+                onChanged: viewModel.industries.isEmpty
+                    ? null
+                    : (value) => viewModel.onIndustryChanged(value),
+                icon: const Icon(Icons.arrow_drop_down),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return ContactDetailItem(
+      icon: icon,
+      label: 'Industry',
+      value: viewModel.selectedIndustryDisplay.isNotEmpty
+          ? viewModel.selectedIndustryDisplay
+          : "N/A",
     );
   }
 }

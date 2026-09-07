@@ -11,6 +11,7 @@ class ContactEditableField extends StatelessWidget {
   final bool isEditing;
   final TextInputType? keyboardType;
   final VoidCallback onEdit;
+  final VoidCallback onDelete;
 
   const ContactEditableField({
     super.key,
@@ -19,64 +20,53 @@ class ContactEditableField extends StatelessWidget {
     required this.controller,
     required this.isEditing,
     required this.onEdit,
+    required this.onDelete,
     this.keyboardType,
   });
 
   @override
   Widget build(BuildContext context) {
     if (isEditing) {
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // First row: Icon + Input + Cancel
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(label),
-                    ),
-                    GestureDetector(
-                      onTap: onEdit,
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.close,
-                            color: BaseColors().primaryColor,
-                            size: 18,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Cancel',
-                            style: TextStyle(color: BaseColors().primaryColor),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                Icon(icon),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: EditField(
+                    label: '',
+                    controller: controller,
+                    keyboardType: keyboardType,
+                  ),
                 ),
-                const SizedBox(height: 5),
-                EditField(
-                  label: label,
-                  controller: controller,
-                  keyboardType: keyboardType,
+                const SizedBox(width: 10),
+                GestureDetector(
+                  onTap: onEdit,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.close,
+                        color: BaseColors().primaryColor,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Cancel',
+                        style: TextStyle(color: BaseColors().primaryColor),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-          ),
-        ],
+          ],
+        ),
       );
     }
 
@@ -85,6 +75,7 @@ class ContactEditableField extends StatelessWidget {
       label: label,
       value: controller.text.isNotEmpty ? controller.text : "N/A",
       onEdit: onEdit,
+      onDelete: onDelete,
     );
   }
 }
