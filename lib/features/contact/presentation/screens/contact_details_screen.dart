@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:biz_scan_app/core/colors.dart';
-import 'package:biz_scan_app/view_models/camera_provider.dart';
+import 'package:biz_scan_app/features/scan/viewmodels/camera_viewmodel.dart';
 import 'package:biz_scan_app/widgets/action_button_widget.dart';
 import 'package:biz_scan_app/widgets/contact_details_card.dart';
 import 'package:biz_scan_app/widgets/custom_app_bar.dart';
@@ -10,10 +10,11 @@ import 'package:biz_scan_app/widgets/personal_details_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../models/contacts_details.dart';
-import '../utils/pop_menu_selector.dart';
-import '../utils/utils.dart';
-import 'nav_bar.dart';
+import '../../data/contact_services.dart';
+import '../../domain/models/contacts_details.dart';
+import '../../../../utils/pop_menu_selector.dart';
+import '../../../../utils/utils.dart';
+import '../../../../navigation/nav_bar.dart';
 
 class ContactDetailsScreen extends StatelessWidget {
   final ContactDetails contact;
@@ -27,7 +28,7 @@ class ContactDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cameraProvider = context.watch<CameraProvider>();
+    final cameraProvider = context.watch<CameraViewModel>();
 
     return Scaffold(
       backgroundColor: BaseColors().whiteColor,
@@ -171,10 +172,4 @@ class ContactDetailsScreen extends StatelessWidget {
       ),
     );
   }
-
-  void callNow(String phone) {}
-  void sendSms(String phone) {}
-  void whatsApp(String phone) {}
-  void sendEmail(String email) {}
-  void saveToPhoneBook() {}
 }

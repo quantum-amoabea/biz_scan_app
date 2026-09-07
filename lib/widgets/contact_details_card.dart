@@ -5,8 +5,8 @@ import 'package:biz_scan_app/widgets/phone_label.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../models/contacts_details.dart';
-import '../view_models/scan_provider.dart';
+import '../features/contact/domain/models/contacts_details.dart';
+import '../features/scan/viewmodels/scan_viewmodel.dart';
 import 'add_field_button.dart';
 import 'contact_editable_field.dart';
 
@@ -59,7 +59,7 @@ class _ContactDetailsCardState extends State<ContactDetailsCard> {
 
   @override
   Widget build(BuildContext context) {
-    final scanProvider = context.read<ScanProvider>();
+    final scanProvider = context.read<ScanViewModel>();
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),

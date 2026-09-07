@@ -1,5 +1,5 @@
-import '../models/contacts.dart';
-import '../models/contacts_details.dart';
+import '../features/contact/domain/models/contacts.dart';
+import '../features/contact/domain/models/contacts_details.dart';
 
 extension ItemsMapper on Items {
   ContactDetails toContactDetails() {

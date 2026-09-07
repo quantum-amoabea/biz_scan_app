@@ -1,9 +1,9 @@
 import 'dart:io';
-import 'package:biz_scan_app/models/scan_card.dart';
+import 'package:biz_scan_app/features/scan/domain/models/scan_card.dart';
 import 'package:biz_scan_app/utils/scanned_card_mapper.dart';
-import 'package:biz_scan_app/view_models/camera_provider.dart';
-import 'package:biz_scan_app/view_models/scan_provider.dart';
-import 'package:biz_scan_app/views/contact_details_screen.dart';
+import 'package:biz_scan_app/features/scan/viewmodels/camera_viewmodel.dart';
+import 'package:biz_scan_app/features/scan/viewmodels/scan_viewmodel.dart';
+import 'package:biz_scan_app/features/contact/presentation/screens/contact_details_screen.dart';
 import 'package:biz_scan_app/widgets/custom_app_bar.dart';
 import 'package:biz_scan_app/widgets/custom_textbutton.dart';
 import 'package:biz_scan_app/widgets/image_modal_sheet.dart';
@@ -11,9 +11,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
-import '../core/colors.dart';
-import '../models/regions.dart';
-import 'nav_bar.dart';
+import '../../../../core/colors.dart';
+import '../../domain/models/regions.dart';
+import '../../../../navigation/nav_bar.dart';
 
 class ReviewContactScreen extends StatefulWidget {
   const ReviewContactScreen({super.key});
@@ -30,9 +30,9 @@ class _ReviewContactScreenState extends State<ReviewContactScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final cameraProvider = context.watch<CameraProvider>();
-    final scanProvider = context.watch<ScanProvider>();
-    final readCameraProvider = context.read<CameraProvider>();
+    final cameraProvider = context.watch<CameraViewModel>();
+    final scanProvider = context.watch<ScanViewModel>();
+    final readCameraProvider = context.read<CameraViewModel>();
 
     return Scaffold(
       appBar: const CustomAppBar(),
@@ -54,7 +54,7 @@ class _ReviewContactScreenState extends State<ReviewContactScreen> {
                       label: 'Front',
                       showRemove: true,
                       onRemove: () {
-                        context.read<CameraProvider>().clearAllImages();
+                        context.read<CameraViewModel>().clearAllImages();
 
                         Navigator.pushAndRemoveUntil(
                           context,
@@ -163,7 +163,7 @@ class _ReviewContactScreenState extends State<ReviewContactScreen> {
                         CustomTextButton(
                           text: 'Scan',
                           borderRadius: 30,
-                          isLoading: context.watch<ScanProvider>().isScanning,
+                          isLoading: context.watch<ScanViewModel>().isScanning,
                           onPressed: () async {
                             if (readCameraProvider.frontImage == null) {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -230,7 +230,7 @@ class _ReviewContactScreenState extends State<ReviewContactScreen> {
                 ),
               ),
 
-              if (context.watch<ScanProvider>().isScanning)
+              if (context.watch<ScanViewModel>().isScanning)
                 Positioned.fill(
                   child: Container(color: Colors.black.withValues(alpha: 0.5)),
                 ),

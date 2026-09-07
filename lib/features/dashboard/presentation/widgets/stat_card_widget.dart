@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:biz_scan_app/core/colors.dart';
 
-class DashboardStatCard extends StatelessWidget {
+class StatCardWidget extends StatelessWidget {
   final String value;
   final String title;
   final IconData icon;
   final void Function()? onTap;
 
-  const DashboardStatCard({
+  const StatCardWidget({
     super.key,
     required this.value,
     required this.title,

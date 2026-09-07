@@ -1,17 +1,17 @@
 import 'dart:io';
 
 import 'package:biz_scan_app/core/colors.dart';
-import 'package:biz_scan_app/view_models/camera_provider.dart';
-import 'package:biz_scan_app/view_models/contacts_provider.dart';
-import 'package:biz_scan_app/views/contact_details_screen.dart';
+import 'package:biz_scan_app/features/scan/viewmodels/camera_viewmodel.dart';
+import 'package:biz_scan_app/features/contact/viewmodels/contacts_viewmodel.dart';
+import 'package:biz_scan_app/features/contact/presentation/screens/contact_details_screen.dart';
 import 'package:biz_scan_app/widgets/custom_app_bar.dart';
 import 'package:biz_scan_app/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../models/contacts.dart';
-import '../utils/contact_mapper.dart';
-import '../widgets/contacts_shimmer.dart';
+import '../../domain/models/contacts.dart';
+import '../../../../utils/contact_mapper.dart';
+import '../../../../widgets/contacts_shimmer.dart';
 
 class ContactScreen extends StatefulWidget {
   const ContactScreen({super.key});
@@ -101,7 +101,7 @@ class _ContactScreenState extends State<ContactScreen> {
   }
 
   Widget _contactList(BuildContext context) {
-    final contactsProvider = context.watch<ContactsProvider>();
+    final contactsProvider = context.watch<ContactsViewModel>();
 
     final bool isSearching = searchController.text.trim().isNotEmpty;
 
@@ -118,7 +118,7 @@ class _ContactScreenState extends State<ContactScreen> {
             controller: searchController,
             hintText: "Search names, companies, job titles",
             onChanged: (value) {
-              context.read<ContactsProvider>().getFilteredContacts(value);
+              context.read<ContactsViewModel>().getFilteredContacts(value);
             },
           ),
 
@@ -157,7 +157,7 @@ class _ContactScreenState extends State<ContactScreen> {
   }
 
   Widget _sharedContactList(BuildContext context) {
-  final contactsProvider = context.watch<ContactsProvider>();
+  final contactsProvider = context.watch<ContactsViewModel>();
 
   final bool isSearching =
       sharedSearchController.text.trim().isNotEmpty;
@@ -176,7 +176,7 @@ class _ContactScreenState extends State<ContactScreen> {
           hintText: "Search names, companies, job titles",
           onChanged: (value) {
             context
-                .read<ContactsProvider>()
+                .read<ContactsViewModel>()
                 .getFilteredSharedContacts(value);
           },
         ),
@@ -227,7 +227,7 @@ class ContactDetailsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cameraProvider = context.watch<CameraProvider>();
+    final cameraProvider = context.watch<CameraViewModel>();
 
     return GestureDetector(
       onTap: () {

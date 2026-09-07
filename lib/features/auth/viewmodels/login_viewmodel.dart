@@ -1,12 +1,11 @@
 import 'package:biz_scan_app/core/network/dio_client.dart';
 import 'package:biz_scan_app/core/offline/prefs_manager.dart';
-import 'package:biz_scan_app/core/toast_message.dart';
-import 'package:biz_scan_app/models/login_user.dart';
-import 'package:biz_scan_app/models/login_user_reponse.dart';
-import 'package:biz_scan_app/models/user.dart';
+import 'package:biz_scan_app/features/auth/domain/models/login_user.dart';
+import 'package:biz_scan_app/features/auth/domain/models/login_user_response.dart';
+import 'package:biz_scan_app/features/auth/domain/models/user.dart';
 import 'package:flutter/cupertino.dart';
 
-class LoginProvider extends ChangeNotifier {
+class LoginViewModel extends ChangeNotifier {
   LoginUserResponse? loginUserResponse;
 
   bool _isLoading = false;

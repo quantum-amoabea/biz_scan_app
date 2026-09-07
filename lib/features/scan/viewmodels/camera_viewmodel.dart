@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:image_picker/image_picker.dart';
 
-class CameraProvider extends ChangeNotifier {
+class CameraViewModel extends ChangeNotifier {
   XFile? frontImage;
   XFile? backImage;
 

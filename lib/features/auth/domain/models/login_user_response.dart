@@ -1,4 +1,4 @@
-import 'package:biz_scan_app/models/user.dart';
+import 'package:biz_scan_app/features/auth/domain/models/user.dart';
 
 class LoginUserResponse {
   String? accessToken;

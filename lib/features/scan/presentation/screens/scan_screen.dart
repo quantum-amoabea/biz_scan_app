@@ -1,6 +1,6 @@
 import 'package:biz_scan_app/core/colors.dart';
-import 'package:biz_scan_app/view_models/camera_provider.dart';
-import 'package:biz_scan_app/view_models/scan_provider.dart';
+import 'package:biz_scan_app/features/scan/viewmodels/camera_viewmodel.dart';
+import 'package:biz_scan_app/features/scan/viewmodels/scan_viewmodel.dart';
 import 'package:biz_scan_app/widgets/custom_app_bar.dart';
 import 'package:biz_scan_app/widgets/custom_textbutton.dart';
 import 'package:biz_scan_app/widgets/image_modal_sheet.dart';
@@ -13,8 +13,8 @@ class ScanScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cameraProvider = context.read<CameraProvider>();
-    final scanProvider = context.read<ScanProvider>();
+    final cameraProvider = context.read<CameraViewModel>();
+    final scanProvider = context.read<ScanViewModel>();
     return Scaffold(
       backgroundColor: BaseColors().whiteColor,
       appBar: CustomAppBar(),

@@ -1,24 +1,23 @@
 import 'package:biz_scan_app/core/colors.dart';
 import 'package:biz_scan_app/core/offline/prefs_manager.dart';
-import 'package:biz_scan_app/view_models/contacts_provider.dart';
-import 'package:biz_scan_app/views/merge_contact_screen.dart';
-import 'package:biz_scan_app/widgets/custom_textbutton.dart';
+import 'package:biz_scan_app/features/contact/viewmodels/contacts_viewmodel.dart';
+import 'package:biz_scan_app/features/contact/presentation/screens/merge_contact_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../widgets/contacts_shimmer.dart';
-import '../widgets/custom_app_bar.dart';
-import '../widgets/dash_stat_card.dart';
-import 'contact_screen.dart';
-import 'nav_bar.dart';
+import '../../../../widgets/contacts_shimmer.dart';
+import '../../../../widgets/custom_app_bar.dart';
+import '../../../../widgets/custom_textbutton.dart';
+import '../../../../features/contact/presentation/screens/contact_screen.dart';
+import '../../../../features/dashboard/presentation/widgets/stat_card_widget.dart';
+import '../../../../navigation/nav_bar.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final contactProvider = context.watch<ContactsProvider>();
-    final contacts = contactProvider.contacts.take(3).toList();
+    final contactProvider = context.watch<ContactsViewModel>();
 
     return Scaffold(
       backgroundColor: BaseColors().whiteColor,
@@ -136,7 +135,7 @@ class DashboardScreen extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: DashboardStatCard(
+                    child: StatCardWidget(
                       value: '0',
                       title: 'Awaiting Review',
                       icon: Icons.event_note_outlined,
@@ -147,7 +146,7 @@ class DashboardScreen extends StatelessWidget {
                   const SizedBox(width: 10),
 
                   Expanded(
-                    child: DashboardStatCard(
+                    child: StatCardWidget(
                       value: '0',
                       title: 'Possible Duplicates',
                       icon: Icons.copy,

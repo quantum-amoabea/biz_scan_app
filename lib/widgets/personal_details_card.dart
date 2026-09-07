@@ -3,7 +3,7 @@ import 'package:biz_scan_app/widgets/contact_detail_item.dart';
 import 'package:biz_scan_app/widgets/edit_field.dart';
 import 'package:flutter/material.dart';
 
-import '../models/contacts_details.dart';
+import '../features/contact/domain/models/contacts_details.dart';
 
 class PersonalDetailsCard extends StatefulWidget {
   final ContactDetails contact;

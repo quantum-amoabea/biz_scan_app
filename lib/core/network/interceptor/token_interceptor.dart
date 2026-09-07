@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:collection';
-import 'package:biz_scan_app/models/login_user.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 

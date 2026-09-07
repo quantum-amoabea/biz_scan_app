@@ -1,9 +1,9 @@
-import 'package:biz_scan_app/views/review_contact_screen.dart';
+import 'package:biz_scan_app/features/scan/presentation/screens/review_contact_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
-import '../view_models/camera_provider.dart';
+import '../features/scan/viewmodels/camera_viewmodel.dart';
 
 void showImageSourceActionSheet(
   BuildContext context, {
@@ -22,10 +22,10 @@ void showImageSourceActionSheet(
               Navigator.pop(context);
 
               isFrontImage
-                  ? await context.read<CameraProvider>().chooseFrontImage(
+                  ? await context.read<CameraViewModel>().chooseFrontImage(
                       ImageSource.camera,
                     )
-                  : await context.read<CameraProvider>().chooseBackImage(
+                  : await context.read<CameraViewModel>().chooseBackImage(
                       ImageSource.camera,
                     );
 
@@ -47,10 +47,10 @@ void showImageSourceActionSheet(
               Navigator.pop(context);
 
               isFrontImage
-                  ? await context.read<CameraProvider>().chooseFrontImage(
+                  ? await context.read<CameraViewModel>().chooseFrontImage(
                       ImageSource.gallery,
                     )
-                  : await context.read<CameraProvider>().chooseBackImage(
+                  : await context.read<CameraViewModel>().chooseBackImage(
                       ImageSource.gallery,
                     );
 

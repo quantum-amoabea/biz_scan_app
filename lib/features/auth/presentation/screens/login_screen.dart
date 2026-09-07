@@ -1,14 +1,14 @@
 import 'package:biz_scan_app/core/colors.dart';
 import 'package:biz_scan_app/core/size_config.dart';
-import 'package:biz_scan_app/models/login_user.dart';
-import 'package:biz_scan_app/view_models/login_provider.dart';
-import 'package:biz_scan_app/views/nav_bar.dart';
+import 'package:biz_scan_app/features/auth/domain/models/login_user.dart';
+import 'package:biz_scan_app/features/auth/viewmodels/login_viewmodel.dart';
+import 'package:biz_scan_app/navigation/nav_bar.dart';
 import 'package:biz_scan_app/widgets/custom_textbutton.dart';
 import 'package:biz_scan_app/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../core/toast_message.dart';
+import '../../../../core/toast_message.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -35,7 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try{
       final user = LoginUser(username: username, password: password);
 
-    await context.read<LoginProvider>().loginUser(user);
+    await context.read<LoginViewModel>().loginUser(user);
 
     showToast(message: "Logged in successfully");
 
@@ -129,7 +129,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   CustomTextButton(
                     text: 'Sign In',
                     icon: true,
-                    isLoading: context.watch<LoginProvider>().isLoading,
+                    isLoading: context.watch<LoginViewModel>().isLoading,
                     onPressed: () async => await loginUser(),
                   ),
 

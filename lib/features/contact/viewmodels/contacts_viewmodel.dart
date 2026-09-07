@@ -2,9 +2,9 @@ import 'package:biz_scan_app/core/network/dio_client.dart';
 import 'package:biz_scan_app/core/toast_message.dart';
 import 'package:flutter/cupertino.dart';
 
-import '../models/contacts.dart';
+import '../domain/models/contacts.dart';
 
-class ContactsProvider extends ChangeNotifier {
+class ContactsViewModel extends ChangeNotifier {
   final DioClient _dioClient = DioClient();
 
   List<Items> contacts = [];

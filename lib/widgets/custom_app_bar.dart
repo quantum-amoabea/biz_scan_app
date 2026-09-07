@@ -1,4 +1,4 @@
-import 'package:biz_scan_app/views/login_screen.dart';
+import 'package:biz_scan_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 

@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../models/user.dart';
+import '../../features/auth/domain/models/user.dart';
 
 class PrefsManager {
   static final PrefsManager _instance = PrefsManager.internal();

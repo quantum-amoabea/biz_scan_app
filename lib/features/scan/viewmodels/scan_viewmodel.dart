@@ -1,13 +1,13 @@
 import 'package:biz_scan_app/core/network/dio_client.dart';
 import 'package:biz_scan_app/core/toast_message.dart';
-import 'package:biz_scan_app/models/regions.dart';
-import 'package:biz_scan_app/models/scan_card.dart';
-import 'package:biz_scan_app/models/scan_card_reponse.dart';
-import 'package:biz_scan_app/models/scanned_card_details.dart';
+import 'package:biz_scan_app/features/scan/domain/models/regions.dart';
+import 'package:biz_scan_app/features/scan/domain/models/scan_card.dart';
+import 'package:biz_scan_app/features/scan/domain/models/scan_card_response.dart';
+import 'package:biz_scan_app/features/scan/domain/models/scanned_card_details.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 
-class ScanProvider extends ChangeNotifier {
+class ScanViewModel extends ChangeNotifier {
   Country? countries;
   Regions? selectedRegion;
   ScannedCardDetails? scannedCardDetails;
@@ -22,9 +22,8 @@ class ScanProvider extends ChangeNotifier {
   final DioClient _dioClient = DioClient();
 
 
-  void resetScan(){
+void resetScan(){
    selectedRegion = null;
-    countries = null;
   }
 
   Future<void> getCountries() async {

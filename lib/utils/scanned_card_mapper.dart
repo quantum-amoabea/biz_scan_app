@@ -1,5 +1,5 @@
-import '../models/contacts_details.dart';
-import '../models/scanned_card_details.dart';
+import '../features/contact/domain/models/contacts_details.dart';
+import '../features/scan/domain/models/scanned_card_details.dart';
 
 extension ScannedCardDetailsMapper on ScannedCardDetails {
   ContactDetails toContactDetails() {

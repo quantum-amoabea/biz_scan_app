@@ -1,8 +1,8 @@
-import 'package:biz_scan_app/view_models/camera_provider.dart';
-import 'package:biz_scan_app/view_models/contacts_provider.dart';
-import 'package:biz_scan_app/view_models/login_provider.dart';
-import 'package:biz_scan_app/view_models/scan_provider.dart';
-import 'package:biz_scan_app/views/login_screen.dart';
+import 'package:biz_scan_app/features/scan/viewmodels/camera_viewmodel.dart';
+import 'package:biz_scan_app/features/contact/viewmodels/contacts_viewmodel.dart';
+import 'package:biz_scan_app/features/auth/viewmodels/login_viewmodel.dart';
+import 'package:biz_scan_app/features/scan/viewmodels/scan_viewmodel.dart';
+import 'package:biz_scan_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
@@ -26,10 +26,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => CameraProvider()),
-        ChangeNotifierProvider(create: (_) => LoginProvider()),
-        ChangeNotifierProvider(create: (_) => ScanProvider()),
-        ChangeNotifierProvider(create: (_) => ContactsProvider()),
+        ChangeNotifierProvider(create: (_) => CameraViewModel()),
+        ChangeNotifierProvider(create: (_) => LoginViewModel()),
+        ChangeNotifierProvider(create: (_) => ScanViewModel()),
+        ChangeNotifierProvider(create: (_) => ContactsViewModel()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

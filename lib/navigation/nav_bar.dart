@@ -1,13 +1,13 @@
-import 'package:biz_scan_app/views/contact_screen.dart';
-import 'package:biz_scan_app/views/dashboard_screen.dart';
-import 'package:biz_scan_app/views/scan_screen.dart';
+import 'package:biz_scan_app/features/contact/presentation/screens/contact_screen.dart';
+import 'package:biz_scan_app/features/dashboard/presentation/screens/dashboard_screen.dart';
+import 'package:biz_scan_app/features/scan/presentation/screens/scan_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../core/colors.dart';
 import '../core/size_config.dart';
-import '../view_models/contacts_provider.dart';
-import '../view_models/scan_provider.dart';
+import '../features/contact/viewmodels/contacts_viewmodel.dart';
+import '../features/scan/viewmodels/scan_viewmodel.dart';
 
 class NavBar extends StatefulWidget {
   final int initialIndex;
@@ -43,8 +43,8 @@ class _NavBarState extends State<NavBar> {
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final contactProvider = context.read<ContactsProvider>();
-      final scanProvider = context.read<ScanProvider>();
+      final contactProvider = context.read<ContactsViewModel>();
+      final scanProvider = context.read<ScanViewModel>();
 
       await contactProvider.getContacts();
       await contactProvider.getSharedContacts();
