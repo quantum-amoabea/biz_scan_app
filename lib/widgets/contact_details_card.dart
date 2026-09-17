@@ -1,17 +1,21 @@
 import 'package:biz_scan_app/core/colors.dart';
+import 'package:biz_scan_app/features/contact/contact.dart';
+import 'package:biz_scan_app/features/contact/domain/models/update_email.dart';
+import 'package:biz_scan_app/features/contact/domain/models/update_phone.dart';
+import 'package:biz_scan_app/features/scan/domain/models/regions.dart';
+import 'package:biz_scan_app/widgets/add_field_button.dart';
+import 'package:biz_scan_app/widgets/contact_editable_field.dart';
 import 'package:biz_scan_app/widgets/custom_textfield.dart';
+import 'package:biz_scan_app/widgets/delete_dialog.dart';
 import 'package:biz_scan_app/widgets/edit_dialog.dart';
 import 'package:biz_scan_app/widgets/phone_label.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../features/contact/domain/models/contacts_details.dart';
 import '../features/scan/viewmodels/scan_viewmodel.dart';
-import 'add_field_button.dart';
-import 'contact_editable_field.dart';
 
 class ContactDetailsCard extends StatefulWidget {
-  final ContactDetails contact;
+  final Items contact;
 
   const ContactDetailsCard({super.key, required this.contact});
 
@@ -24,11 +28,14 @@ class _ContactDetailsCardState extends State<ContactDetailsCard> {
   int? editingEmailIndex;
   bool editingWebsite = false;
 
-  String selectedPhoneType = 'Home';
+  String selectedPhoneType = 'home';
   String selectedWebsiteKind = 'Website';
-  late final List<TextEditingController> phoneControllers;
-  late final List<TextEditingController> emailControllers;
+
+  late List<TextEditingController> phoneControllers;
+  late List<TextEditingController> emailControllers;
+
   late final TextEditingController websiteController;
+
   final TextEditingController editPhoneController = TextEditingController();
   final TextEditingController editWebsiteController = TextEditingController();
   final TextEditingController editEmailController = TextEditingController();
@@ -36,13 +43,112 @@ class _ContactDetailsCardState extends State<ContactDetailsCard> {
   @override
   void initState() {
     super.initState();
-    phoneControllers = widget.contact.phones
-        .map((phone) => TextEditingController(text: phone.value))
+
+    final contactProvider = context.read<ContactsViewModel>();
+
+    if (!contactProvider.contacts.any((c) => c.id == widget.contact.id)) {
+      contactProvider.contacts.add(widget.contact);
+    }
+
+    phoneControllers = (widget.contact.phones ?? [])
+        .map(
+          (phone) => TextEditingController(
+            text: phone.raw ?? phone.display ?? phone.e164 ?? '',
+          ),
+        )
         .toList();
-    emailControllers = widget.contact.emails
-        .map((email) => TextEditingController(text: email.value))
+
+    emailControllers = (widget.contact.emails ?? [])
+        .map((email) => TextEditingController(text: email.email ?? ''))
         .toList();
-    websiteController = TextEditingController(text: widget.contact.website);
+
+    websiteController = TextEditingController(
+      text: _getWebsite(widget.contact),
+    );
+  }
+
+  String _getWebsite(Items contact) {
+    final socials = contact.socials ?? [];
+
+    final website = socials.cast<Socials?>().firstWhere(
+      (social) => social?.platform?.toLowerCase() == 'website',
+      orElse: () => null,
+    );
+
+    return website?.url ?? '';
+  }
+
+  void _syncPhoneControllers(Items contact) {
+    final phones = contact.phones ?? [];
+
+    while (phoneControllers.length > phones.length) {
+      phoneControllers.removeLast().dispose();
+    }
+
+    while (phoneControllers.length < phones.length) {
+      phoneControllers.add(TextEditingController());
+    }
+
+    for (var i = 0; i < phones.length; i++) {
+      final text = phones[i].raw ?? phones[i].display ?? phones[i].e164 ?? '';
+
+      if (phoneControllers[i].text != text) {
+        phoneControllers[i].value = TextEditingValue(
+          text: text,
+          selection: TextSelection.collapsed(offset: text.length),
+        );
+      }
+    }
+  }
+
+  void _syncEmailControllers(Items contact) {
+    final emails = contact.emails ?? [];
+
+    while (emailControllers.length > emails.length) {
+      emailControllers.removeLast().dispose();
+    }
+
+    while (emailControllers.length < emails.length) {
+      emailControllers.add(TextEditingController());
+    }
+
+    for (var i = 0; i < emails.length; i++) {
+      final text = emails[i].email ?? '';
+
+      if (emailControllers[i].text != text) {
+        emailControllers[i].value = TextEditingValue(
+          text: text,
+          selection: TextSelection.collapsed(offset: text.length),
+        );
+      }
+    }
+  }
+
+  void _syncWebsiteController(Items contact) {
+    final website = _getWebsite(contact);
+
+    if (websiteController.text != website) {
+      websiteController.value = TextEditingValue(
+        text: website,
+        selection: TextSelection.collapsed(offset: website.length),
+      );
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant ContactDetailsCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    final contactProvider = context.read<ContactsViewModel>();
+
+    final currentContact = contactProvider.contacts.firstWhere(
+      (c) => c.id == widget.contact.id,
+      orElse: () => widget.contact,
+    );
+
+    _syncPhoneControllers(currentContact);
+    _syncEmailControllers(currentContact);
+    _syncWebsiteController(currentContact);
   }
 
   @override
@@ -50,16 +156,36 @@ class _ContactDetailsCardState extends State<ContactDetailsCard> {
     for (final controller in phoneControllers) {
       controller.dispose();
     }
+
     for (final controller in emailControllers) {
       controller.dispose();
     }
+
     websiteController.dispose();
+    editPhoneController.dispose();
+    editWebsiteController.dispose();
+    editEmailController.dispose();
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final scanProvider = context.read<ScanViewModel>();
+    final scanProvider = context.watch<ScanViewModel>();
+    final contactProvider = context.watch<ContactsViewModel>();
+
+    final currentContact = contactProvider.contacts.firstWhere(
+      (c) => c.id == widget.contact.id,
+      orElse: () => widget.contact,
+    );
+
+    _syncPhoneControllers(currentContact);
+    _syncEmailControllers(currentContact);
+    _syncWebsiteController(currentContact);
+
+    final phones = currentContact.phones ?? [];
+    final emails = currentContact.emails ?? [];
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -81,12 +207,18 @@ class _ContactDetailsCardState extends State<ContactDetailsCard> {
             'CONTACT DETAILS',
             style: TextStyle(fontWeight: FontWeight.w600),
           ),
+
           const SizedBox(height: 15),
-          ...List.generate(phoneControllers.length, (index) {
-            final type = widget.contact.phones.length > index
-                ? widget.contact.phones[index].type
-                : '';
-            final label = type.isNotEmpty ? 'Phone ($type)' : 'Phone ${index + 1}';
+
+          ...List.generate(phones.length, (index) {
+            final phone = phones[index];
+
+            final type = phone.type ?? '';
+
+            final label = type.isNotEmpty
+                ? 'Phone ($type)'
+                : 'Phone ${index + 1}';
+
             return ContactEditableField(
               icon: Icons.phone,
               label: label,
@@ -94,24 +226,276 @@ class _ContactDetailsCardState extends State<ContactDetailsCard> {
               isEditing: editingPhoneIndex == index,
               keyboardType: TextInputType.phone,
               onEdit: () {
-                setState(() {
-                  editingPhoneIndex = editingPhoneIndex == index ? null : index;
-                });
+                final phone = phones[index];
 
+                editPhoneController.text =
+                    phone.raw ?? phone.display ?? phone.e164 ?? '';
+
+                selectedPhoneType = (phone.type ?? 'home').toLowerCase();
+
+                final regions = scanProvider.countries?.regions;
+
+                if (regions != null &&
+                    phone.parsedRegion != null &&
+                    phone.parsedRegion!.isNotEmpty) {
+                  final matchingRegion = regions.firstWhere(
+                    (region) =>
+                        region.code?.toLowerCase() ==
+                        phone.parsedRegion!.toLowerCase(),
+                    orElse: () => Regions(),
+                  );
+
+                  if (matchingRegion.code != null &&
+                      matchingRegion.code!.isNotEmpty) {
+                    scanProvider.setSelectedRegion(matchingRegion);
+                  }
+                }
+
+                editDialog(
+                  context,
+                  title: 'Update number',
+                  content: StatefulBuilder(
+                    builder: (context, dialogSetState) {
+                      final availableRegions =
+                          scanProvider.countries?.regions ?? [];
+
+                      final selectedRegion = scanProvider.selectedRegion;
+
+                      final validSelectedRegion =
+                          availableRegions.any(
+                            (region) => region.name == selectedRegion?.name,
+                          )
+                          ? selectedRegion?.name
+                          : null;
+
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CustomTextField(
+                            title: 'Number',
+                            controller: editPhoneController,
+                            keyboardType: TextInputType.phone,
+                          ),
+
+                          const SizedBox(height: 15),
+
+                          const Text('Label'),
+
+                          const SizedBox(height: 10),
+
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              PhoneTypeContainer(
+                                text: 'home',
+                                isSelected: selectedPhoneType == 'home',
+                                onTap: () {
+                                  dialogSetState(() {
+                                    selectedPhoneType = 'home';
+                                  });
+                                },
+                              ),
+                              PhoneTypeContainer(
+                                text: 'work',
+                                isSelected: selectedPhoneType == 'work',
+                                onTap: () {
+                                  dialogSetState(() {
+                                    selectedPhoneType = 'work';
+                                  });
+                                },
+                              ),
+                              PhoneTypeContainer(
+                                text: 'mobile',
+                                isSelected: selectedPhoneType == 'mobile',
+                                onTap: () {
+                                  dialogSetState(() {
+                                    selectedPhoneType = 'mobile';
+                                  });
+                                },
+                              ),
+                              PhoneTypeContainer(
+                                text: 'fax',
+                                isSelected: selectedPhoneType == 'fax',
+                                onTap: () {
+                                  dialogSetState(() {
+                                    selectedPhoneType = 'fax';
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          if (scanProvider.countries == null)
+                            Text(
+                              'Unable to load regions',
+                              style: TextStyle(
+                                color: BaseColors().primaryColor,
+                              ),
+                            )
+                          else
+                            DropdownButtonFormField<String>(
+                              decoration: InputDecoration(
+                                labelText: 'Card collected in',
+                                labelStyle: TextStyle(
+                                  color: BaseColors().blackColor,
+                                ),
+                                prefixIcon: const Icon(Icons.public),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(
+                                    color: BaseColors().greyColor,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(
+                                    color: BaseColors().greyColor,
+                                    width: 0.8,
+                                  ),
+                                ),
+                              ),
+                              initialValue: validSelectedRegion,
+                              items: availableRegions.map((region) {
+                                return DropdownMenuItem<String>(
+                                  value: region.name,
+                                  child: SizedBox(
+                                    width: 120,
+                                    child: Text(
+                                      region.name ?? '',
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                if (value == null) {
+                                  return;
+                                }
+
+                                final region = availableRegions.firstWhere(
+                                  (region) => region.name == value,
+                                );
+
+                                scanProvider.setSelectedRegion(region);
+
+                                dialogSetState(() {});
+                              },
+                            ),
+                        ],
+                      );
+                    },
+                  ),
+                  onSave: () async {
+                    final phoneId = phone.id;
+                    final contactId = widget.contact.id;
+
+                    if (phoneId == null || phoneId.isEmpty) {
+                      return;
+                    }
+
+                    if (contactId == null || contactId.isEmpty) {
+                      return;
+                    }
+
+                    final selectedRegion = scanProvider.selectedRegion;
+
+                    if (selectedRegion == null ||
+                        selectedRegion.code == null ||
+                        selectedRegion.code!.isEmpty) {
+                      return;
+                    }
+
+                    final number = editPhoneController.text.trim();
+
+                    if (number.isEmpty) {
+                      return;
+                    }
+
+                    final updatePhone = UpdatePhone(
+                      raw: number,
+                      type: selectedPhoneType,
+                      isPrimary: phone.isPrimary ?? false,
+                      region: selectedRegion.code,
+                    );
+
+                    await contactProvider.updatePhone(
+                      contactId,
+                      phoneId,
+                      updatePhone,
+                    );
+
+                    if (!mounted) {
+                      return;
+                    }
+
+                    setState(() {
+                      editingPhoneIndex = null;
+                    });
+
+                    Navigator.pop(context);
+                  },
+                );
               },
-              onDelete: (){
+              onDelete: () {
+                final phoneId = phone.id;
 
+                if (phoneId == null || phoneId.isEmpty) {
+                  return;
+                }
+
+                showDeleteDialog(
+                  context,
+                  title: 'Delete Number',
+                  content: const Text(
+                    'Are you sure you want to delete this number? '
+                    'This action cannot be undone.',
+                  ),
+                  onConfirm: () async {
+                    Navigator.pop(context);
+
+                    final contactId = widget.contact.id;
+
+                    if (contactId == null || contactId.isEmpty) {
+                      return;
+                    }
+
+                    await contactProvider.deletePhone(contactId, phoneId);
+                  },
+                );
               },
             );
           }),
+
           AddFieldButton(
             label: 'Add Phone',
             onPressed: () {
+              editPhoneController.clear();
+              selectedPhoneType = 'home';
+
               editDialog(
                 context,
-                title: "Add a number",
+                title: 'Add a number',
                 content: StatefulBuilder(
                   builder: (context, dialogSetState) {
+                    final regions = scanProvider.countries?.regions ?? [];
+
+                    final selectedRegion = scanProvider.selectedRegion;
+
+                    final validSelectedRegion =
+                        regions.any(
+                          (region) => region.name == selectedRegion?.name,
+                        )
+                        ? selectedRegion?.name
+                        : null;
+
                     return Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,52 +505,58 @@ class _ContactDetailsCardState extends State<ContactDetailsCard> {
                           controller: editPhoneController,
                           keyboardType: TextInputType.phone,
                         ),
+
                         const SizedBox(height: 15),
+
                         const Text('Label'),
+
                         const SizedBox(height: 10),
+
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
                           children: [
                             PhoneTypeContainer(
-                              text: 'Home',
-                              isSelected: selectedPhoneType == 'Home',
+                              text: 'home',
+                              isSelected: selectedPhoneType == 'home',
                               onTap: () {
                                 dialogSetState(() {
-                                  selectedPhoneType = 'Home';
+                                  selectedPhoneType = 'home';
                                 });
                               },
                             ),
                             PhoneTypeContainer(
-                              text: 'Work',
-                              isSelected: selectedPhoneType == 'Work',
+                              text: 'work',
+                              isSelected: selectedPhoneType == 'work',
                               onTap: () {
                                 dialogSetState(() {
-                                  selectedPhoneType = 'Work';
+                                  selectedPhoneType = 'work';
                                 });
                               },
                             ),
                             PhoneTypeContainer(
-                              text: 'Mobile',
-                              isSelected: selectedPhoneType == 'Mobile',
+                              text: 'mobile',
+                              isSelected: selectedPhoneType == 'mobile',
                               onTap: () {
                                 dialogSetState(() {
-                                  selectedPhoneType = 'Mobile';
+                                  selectedPhoneType = 'mobile';
                                 });
                               },
                             ),
                             PhoneTypeContainer(
-                              text: 'Fax',
-                              isSelected: selectedPhoneType == 'Fax',
+                              text: 'fax',
+                              isSelected: selectedPhoneType == 'fax',
                               onTap: () {
                                 dialogSetState(() {
-                                  selectedPhoneType = 'Fax';
+                                  selectedPhoneType = 'fax';
                                 });
                               },
                             ),
                           ],
                         ),
+
                         const SizedBox(height: 20),
+
                         if (scanProvider.countries == null)
                           Text(
                             'Unable to load regions',
@@ -175,7 +565,7 @@ class _ContactDetailsCardState extends State<ContactDetailsCard> {
                         else
                           DropdownButtonFormField<String>(
                             decoration: InputDecoration(
-                              labelText: "Card collected in",
+                              labelText: 'Card collected in',
                               labelStyle: TextStyle(
                                 color: BaseColors().blackColor,
                               ),
@@ -197,46 +587,93 @@ class _ContactDetailsCardState extends State<ContactDetailsCard> {
                                 ),
                               ),
                             ),
-                            initialValue: scanProvider.selectedRegion?.name,
-                            items: scanProvider.countries!.regions?.map(
-                              (region) {
-                                return DropdownMenuItem<String>(
-                                  value: region.name,
-                                  child: SizedBox(
-                                    width: 120,
-                                    child: Text(
-                                      region.name ?? '',
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                    ),
+                            initialValue: validSelectedRegion,
+                            items: regions.map((region) {
+                              return DropdownMenuItem<String>(
+                                value: region.name,
+                                child: SizedBox(
+                                  width: 120,
+                                  child: Text(
+                                    region.name ?? '',
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
                                   ),
-                                );
-                              },
-                            ).toList(),
+                                ),
+                              );
+                            }).toList(),
                             onChanged: (value) {
-                              if (value != null) {
-                                final region = scanProvider.countries!.regions!
-                                    .firstWhere(
-                                      (region) => region.name == value,
-                                    );
-                                scanProvider.setSelectedRegion(region);
+                              if (value == null) {
+                                return;
                               }
+
+                              final region = regions.firstWhere(
+                                (region) => region.name == value,
+                              );
+
+                              scanProvider.setSelectedRegion(region);
+
+                              dialogSetState(() {});
                             },
                           ),
                       ],
                     );
                   },
                 ),
-                onSave: () {},
+                onSave: contactProvider.isSavingContactDetails
+                    ? () {}
+                    : () async {
+                        final contactId = widget.contact.id;
+
+                        if (contactId == null || contactId.isEmpty) {
+                          return;
+                        }
+
+                        final selectedRegion = scanProvider.selectedRegion;
+
+                        if (selectedRegion == null ||
+                            selectedRegion.code == null ||
+                            selectedRegion.code!.isEmpty) {
+                          return;
+                        }
+
+                        final number = editPhoneController.text.trim();
+
+                        if (number.isEmpty) {
+                          return;
+                        }
+
+                        final phonePayload = UpdatePhone(
+                          raw: number,
+                          type: selectedPhoneType,
+                          isPrimary: false,
+                          region: selectedRegion.code,
+                        );
+
+                        await contactProvider.addPhone(contactId, phonePayload);
+
+                        if (!mounted) {
+                          return;
+                        }
+
+                        setState(() {});
+
+                        Navigator.pop(context);
+                      },
               );
             },
           ),
+
           const SizedBox(height: 15),
+
           ...List.generate(emailControllers.length, (index) {
-            final type = widget.contact.emails.length > index
-                ? widget.contact.emails[index].type
-                : '';
-            final label = type.isNotEmpty ? 'Email ($type)' : 'Email ${index + 1}';
+            final email = emails[index];
+
+            final type = email.type ?? '';
+
+            final label = type.isNotEmpty
+                ? 'Email ($type)'
+                : 'Email ${index + 1}';
+
             return Padding(
               padding: const EdgeInsets.only(bottom: 15),
               child: ContactEditableField(
@@ -246,57 +683,155 @@ class _ContactDetailsCardState extends State<ContactDetailsCard> {
                 isEditing: editingEmailIndex == index,
                 keyboardType: TextInputType.emailAddress,
                 onEdit: () {
-                  setState(() {
-                    editingEmailIndex = editingEmailIndex == index ? null : index;
-                  });
+                  editEmailController.text = email.email ?? "";
 
+                  editDialog(
+                    context,
+                    title: 'Edit Email',
+                    content: CustomTextField(
+                      controller: editEmailController,
+                      title: 'Email',
+                    ),
+                    onSave: () async {
+                      final emailId = email.id;
+                      final contactId = widget.contact.id;
+
+                      if (emailId == null || emailId.isEmpty) {
+                        return;
+                      }
+
+                      if (contactId == null || contactId.isEmpty) {
+                        return;
+                      }
+
+                      final newEmail = editEmailController.text.trim();
+
+                      if (newEmail.isEmpty) {
+                        return;
+                      }
+
+                      final updateEmail = UpdateEmail(email: newEmail);
+
+                      await contactProvider.updateEmail(
+                        contactId,
+                        emailId,
+                        updateEmail,
+                      );
+
+                      if (!mounted) {
+                        return;
+                      }
+
+                      setState(() {
+                        editingPhoneIndex = null;
+                      });
+
+                      Navigator.pop(context);
+                    },
+                  );
                 },
-                onDelete: (){},
+                onDelete: () {
+                  final emailId = email.id;
+
+                  if (emailId == null || emailId.isEmpty) {
+                    return;
+                  }
+
+                  showDeleteDialog(
+                    context,
+                    title: 'Delete Number',
+                    content: const Text(
+                      'Are you sure you want to delete this email? '
+                      'This action cannot be undone.',
+                    ),
+                    onConfirm: () async {
+                      Navigator.pop(context);
+
+                      final contactId = widget.contact.id;
+
+                      if (contactId == null || contactId.isEmpty) {
+                        return;
+                      }
+
+                      await contactProvider.deleteEmail(contactId, emailId);
+                    },
+                  );
+                },
               ),
             );
           }),
+
           AddFieldButton(
             label: 'Add Email',
             onPressed: () {
+              editEmailController.clear();
+
               editDialog(
                 context,
-                title: "Add an email",
-                content: StatefulBuilder(
-                  builder: (context, dialogSetState) {
-                    return CustomTextField(
-                      title: 'Email',
-                      controller: editEmailController,
-                      keyboardType: TextInputType.emailAddress,
-                    );
-                  },
+                title: 'Add an email',
+                content: CustomTextField(
+                  title: 'Email',
+                  controller: editEmailController,
+                  keyboardType: TextInputType.emailAddress,
                 ),
-                onSave: () {
-                  // save email
-                },
+                onSave: contactProvider.isSavingContactDetails
+                    ? () {}
+                    : () async {
+                        final contactId = widget.contact.id;
+
+                        if (contactId == null || contactId.isEmpty) {
+                          return;
+                        }
+
+                        final email = editEmailController.text.trim();
+
+                        if (email.isEmpty) {
+                          return;
+                        }
+
+                        final emailPayload = UpdateEmail(email: email);
+
+                        await contactProvider.addEmail(contactId, emailPayload);
+
+                        if (!mounted) {
+                          return;
+                        }
+
+                        setState(() {});
+
+                        Navigator.pop(context);
+                      },
               );
             },
           ),
+
           const SizedBox(height: 15),
-          ContactEditableField(
-            icon: Icons.language,
-            label: 'Website',
-            controller: websiteController,
-            isEditing: editingWebsite,
-            keyboardType: TextInputType.url,
-            onEdit: () {
-              setState(() {
-                editingWebsite = !editingWebsite;
-              });
-            },
-            onDelete: (){},
-          ),
+
+          if (websiteController.text.isNotEmpty || editingWebsite)
+            ContactEditableField(
+              icon: Icons.language,
+              label: 'Website',
+              controller: websiteController,
+              isEditing: editingWebsite,
+              keyboardType: TextInputType.url,
+              onEdit: () {
+                setState(() {
+                  editingWebsite = !editingWebsite;
+                });
+              },
+              onDelete: () {},
+            ),
+
           if (websiteController.text.isEmpty && !editingWebsite)
             AddFieldButton(
               label: 'Add Website',
               onPressed: () {
+                editWebsiteController.clear();
+                selectedWebsiteKind = 'Website';
+
                 editDialog(
                   context,
-                  title: "Add a website",
+                  title: 'Add a website',
                   content: StatefulBuilder(
                     builder: (context, dialogSetState) {
                       return Column(
@@ -304,15 +839,16 @@ class _ContactDetailsCardState extends State<ContactDetailsCard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text('Kind'),
+
                           const SizedBox(height: 10),
+
                           Wrap(
                             spacing: 8,
                             runSpacing: 8,
                             children: [
                               PhoneTypeContainer(
                                 text: 'LinkedIn',
-                                isSelected:
-                                    selectedWebsiteKind == 'LinkedIn',
+                                isSelected: selectedWebsiteKind == 'LinkedIn',
                                 onTap: () {
                                   dialogSetState(() {
                                     selectedWebsiteKind = 'LinkedIn';
@@ -330,8 +866,7 @@ class _ContactDetailsCardState extends State<ContactDetailsCard> {
                               ),
                               PhoneTypeContainer(
                                 text: 'Website',
-                                isSelected:
-                                    selectedWebsiteKind == 'Website',
+                                isSelected: selectedWebsiteKind == 'Website',
                                 onTap: () {
                                   dialogSetState(() {
                                     selectedWebsiteKind = 'Website';
@@ -340,8 +875,7 @@ class _ContactDetailsCardState extends State<ContactDetailsCard> {
                               ),
                               PhoneTypeContainer(
                                 text: 'Others',
-                                isSelected:
-                                    selectedWebsiteKind == 'Others',
+                                isSelected: selectedWebsiteKind == 'Others',
                                 onTap: () {
                                   dialogSetState(() {
                                     selectedWebsiteKind = 'Others';
@@ -350,7 +884,9 @@ class _ContactDetailsCardState extends State<ContactDetailsCard> {
                               ),
                             ],
                           ),
+
                           const SizedBox(height: 15),
+
                           CustomTextField(
                             title: 'URL',
                             controller: editWebsiteController,
@@ -360,9 +896,7 @@ class _ContactDetailsCardState extends State<ContactDetailsCard> {
                       );
                     },
                   ),
-                  onSave: () {
-                    // save website
-                  },
+                  onSave: () {},
                 );
               },
             ),

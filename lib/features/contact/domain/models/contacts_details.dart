@@ -33,10 +33,11 @@ class ContactDetails {
 }
 
 class ContactPhone {
+  final String id;
   final String value;
   final String type;
 
-  const ContactPhone({this.value = '', this.type = ''});
+  const ContactPhone({this.value = '', this.type = '', required this.id});
 }
 
 class ContactEmail {

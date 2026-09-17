@@ -41,28 +41,47 @@ Future<void> whatsApp(String phoneNumber) async {
   }
 }
 
-Future<void> saveToPhoneBook() async {
+Future<void> saveToPhoneBook({
+  String? name,
+  String? phoneNumber,
+  String? email,
+}) async {
   final status = await FlutterContacts.permissions.request(
     PermissionType.readWrite,
   );
   if (status == PermissionStatus.granted) {
+    final parts = (name ?? 'Contact').trim().split(RegExp(r'\s+'));
+
+    final contactName = parts.isNotEmpty
+        ? Name(
+            first: parts.first,
+            last: parts.length > 1 ? parts.sublist(1).join(' ') : '',
+          )
+        : const Name(first: 'Contact');
+
+    final phones = phoneNumber != null && phoneNumber.isNotEmpty
+        ? [Phone(label: Label(PhoneLabel.mobile), number: phoneNumber)]
+        : <Phone>[];
+
+    final emails = email != null && email.isNotEmpty
+        ? [Email(address: email, label: Label(EmailLabel.work))]
+        : <Email>[];
+
     final newContact = Contact(
-      name: Name(first: 'Company', last: 'Support'),
-      phones: [Phone(label: Label(PhoneLabel.work), number: '+1234567890')],
-      emails: [
-        Email(address: 'support@example.com', label: Label(EmailLabel.work)),
-      ],
+      name: contactName,
+      phones: phones,
+      emails: emails,
     );
 
     try {
       await FlutterContacts.create(newContact);
 
-      showToast(message: "contact saved successfully");
+      showToast(message: "Contact saved successfully");
     } catch (e) {
       showToast(message: "$e");
     }
   } else {
-    showToast(message: "Could not save phonebook");
+    showToast(message: "Could not save to phonebook");
   }
 }
 

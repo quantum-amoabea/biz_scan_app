@@ -146,4 +146,27 @@ class DioClient {
       throw (errorMessage);
     }
   }
+
+  Future<dynamic> delete(
+    String endpoint, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+  }) async {
+    try {
+      final response = await _dio.delete(
+        endpoint,
+        data: data,
+        queryParameters: queryParameters,
+      );
+      return response.data;
+    } on DioException catch (e) {
+      debugPrint("Error Message: ${e.message}");
+      if (e.response != null) {
+        debugPrint("Error Response Data: ${e.response?.data}");
+        debugPrint("Error Response Headers: ${e.response?.headers}");
+      }
+      final errorMessage = DioExceptions.fromDioError(e).toString();
+      throw (errorMessage);
+    }
+  }
 }

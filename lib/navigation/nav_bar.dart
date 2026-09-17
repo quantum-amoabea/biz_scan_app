@@ -46,7 +46,7 @@ class _NavBarState extends State<NavBar> {
       final contactProvider = context.read<ContactsViewModel>();
       final scanProvider = context.read<ScanViewModel>();
 
-      await contactProvider.getContacts();
+      await contactProvider.getAllContacts();
       await contactProvider.getSharedContacts();
       await scanProvider.getCountries();
     });
@@ -108,7 +108,9 @@ class NavBarIcon extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding:  EdgeInsets.symmetric(horizontal: getProportionateScreenWidth(20)),
+        padding: EdgeInsets.symmetric(
+          horizontal: getProportionateScreenWidth(20),
+        ),
         decoration: BoxDecoration(
           color: isSelected
               ? BaseColors().primaryColor.withValues(alpha: 0.3)

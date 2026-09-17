@@ -1,13 +1,11 @@
 import 'package:biz_scan_app/core/colors.dart';
 import 'package:biz_scan_app/features/contact/presentation/screens/contact_details_screen.dart';
 import 'package:biz_scan_app/features/contact/viewmodels/contacts_viewmodel.dart';
-import 'package:biz_scan_app/features/scan/viewmodels/camera_viewmodel.dart';
 import 'package:biz_scan_app/widgets/custom_app_bar.dart';
 import 'package:biz_scan_app/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../utils/contact_mapper.dart';
 import '../../../../widgets/contacts_shimmer.dart';
 import '../../data/contact_services.dart';
 import '../../domain/models/contacts.dart';
@@ -225,15 +223,13 @@ class ContactDetailsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cameraProvider = context.watch<CameraViewModel>();
-
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) =>
-                ContactDetailsScreen(contact: contacts.toContactDetails()),
+                ContactDetailsScreen(contact: contacts),
           ),
         );
       },

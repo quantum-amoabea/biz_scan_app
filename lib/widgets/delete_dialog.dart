@@ -1,26 +1,22 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../core/toast_message.dart';
 import 'custom_dialog.dart';
 
-void showDeleteDialog(BuildContext context) {
+void showDeleteDialog(
+  BuildContext context, {
+  required String title,
+  required Widget content,
+  required VoidCallback onConfirm,
+}) {
   showDialog(
     context: context,
     builder: (context) {
       return CustomDialog(
-        title: 'Delete Contact',
+        title: title,
         confirmText: 'Delete',
-        content: const Text(
-          'Are you sure you want to delete this contact? '
-          'This action cannot be undone.',
-        ),
-        onConfirm: () {
-          Navigator.pop(context);
-
-          // delete contact here
-
-          showToast(message: 'Contact deleted successfully');
-        },
+        content: content,
+        onConfirm: onConfirm,
       );
     },
   );

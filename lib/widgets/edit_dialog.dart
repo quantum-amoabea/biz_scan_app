@@ -1,5 +1,8 @@
-import 'package:biz_scan_app/core/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../core/colors.dart';
+import '../features/contact/viewmodels/contacts_viewmodel.dart';
 
 void editDialog(
   BuildContext context, {
@@ -10,27 +13,56 @@ void editDialog(
   showDialog(
     context: context,
     builder: (context) {
-      return AlertDialog(
-        backgroundColor: BaseColors().whiteColor,
-        title: Text(title, style: TextStyle(color: BaseColors().primaryColor),),
-        content: Column(mainAxisSize: MainAxisSize.min, children: [content]),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
+      return Consumer<ContactsViewModel>(
+        builder: (context, provider, _) {
+          final isSaving = provider.isSavingContactDetails;
+
+          return AlertDialog(
+            backgroundColor: BaseColors().whiteColor,
+            title: Text(
+              title,
               style: TextStyle(color: BaseColors().primaryColor),
             ),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: BaseColors().primaryColor,
-              foregroundColor: BaseColors().whiteColor,
+            content: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.6,
+              ),
+              child: SingleChildScrollView(
+                child: content,
+              ),
             ),
-            onPressed: onSave,
-            child: Text('Save'),
-          ),
-        ],
+            actions: [
+              TextButton(
+                onPressed: isSaving
+                    ? null
+                    : () => Navigator.pop(context),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(
+                    color: BaseColors().primaryColor,
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: BaseColors().primaryColor,
+                  foregroundColor: BaseColors().whiteColor,
+                ),
+                onPressed: isSaving ? null : onSave,
+                child: isSaving
+                    ?  SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: BaseColors().whiteColor,
+                        ),
+                      )
+                    : const Text('Save'),
+              ),
+            ],
+          );
+        },
       );
     },
   );

@@ -1,9 +1,8 @@
 import 'dart:io';
+import 'package:biz_scan_app/features/contact/contact.dart';
 import 'package:biz_scan_app/features/scan/domain/models/scan_card.dart';
-import 'package:biz_scan_app/utils/scanned_card_mapper.dart';
 import 'package:biz_scan_app/features/scan/viewmodels/camera_viewmodel.dart';
 import 'package:biz_scan_app/features/scan/viewmodels/scan_viewmodel.dart';
-import 'package:biz_scan_app/features/contact/presentation/screens/contact_details_screen.dart';
 import 'package:biz_scan_app/widgets/custom_app_bar.dart';
 import 'package:biz_scan_app/widgets/custom_textbutton.dart';
 import 'package:biz_scan_app/widgets/image_modal_sheet.dart';
@@ -32,6 +31,7 @@ class _ReviewContactScreenState extends State<ReviewContactScreen> {
   Widget build(BuildContext context) {
     final cameraProvider = context.watch<CameraViewModel>();
     final scanProvider = context.watch<ScanViewModel>();
+    final contactProvider = context.read<ContactsViewModel>();
     final readCameraProvider = context.read<CameraViewModel>();
 
     return Scaffold(
@@ -199,12 +199,13 @@ class _ReviewContactScreenState extends State<ReviewContactScreen> {
                             );
 
                             if (isProcessed) {
+                              Items contact = await contactProvider.getContact(scanProvider.scannedCardDetails?.contact?.id ?? "");
+
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => ContactDetailsScreen(
-                                    contact: scanProvider.scannedCardDetails!
-                                        .toContactDetails(),
+                                    contact: contact,
                                     isScannedContact: true,
                                   ),
                                 ),

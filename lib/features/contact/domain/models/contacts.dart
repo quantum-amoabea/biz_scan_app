@@ -11,7 +11,7 @@ class Contacts {
     if (json['items'] != null) {
       items = <Items>[];
       json['items'].forEach((v) {
-        items!.add(Items.fromJson(v));
+        items!.add(new Items.fromJson(v));
       });
     }
     total = json['total'];
@@ -21,14 +21,14 @@ class Contacts {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    if (items != null) {
-      data['items'] = items!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    if (this.items != null) {
+      data['items'] = this.items!.map((v) => v.toJson()).toList();
     }
-    data['total'] = total;
-    data['page'] = page;
-    data['size'] = size;
-    data['pages'] = pages;
+    data['total'] = this.total;
+    data['page'] = this.page;
+    data['size'] = this.size;
+    data['pages'] = this.pages;
     return data;
   }
 }
@@ -47,6 +47,7 @@ class Items {
   String? notes;
   String? industryCode;
   bool? needsReview;
+  List<String>? reviewReasons;
   String? createdAt;
   String? updatedAt;
   List<Phones>? phones;
@@ -55,6 +56,7 @@ class Items {
   List<Socials>? socials;
   List<Actions>? actions;
   SharedBy? sharedBy;
+  CardImages? cardImages;
   String? sourceContactId;
   String? industry;
 
@@ -72,6 +74,7 @@ class Items {
       this.notes,
       this.industryCode,
       this.needsReview,
+      this.reviewReasons,
       this.createdAt,
       this.updatedAt,
       this.phones,
@@ -80,6 +83,7 @@ class Items {
       this.socials,
       this.actions,
       this.sharedBy,
+      this.cardImages,
       this.sourceContactId,
       this.industry});
 
@@ -97,82 +101,90 @@ class Items {
     notes = json['notes'];
     industryCode = json['industry_code'];
     needsReview = json['needs_review'];
+    reviewReasons = json['review_reasons'].cast<String>();
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
     if (json['phones'] != null) {
       phones = <Phones>[];
       json['phones'].forEach((v) {
-        phones!.add( Phones.fromJson(v));
+        phones!.add(new Phones.fromJson(v));
       });
     }
     if (json['emails'] != null) {
       emails = <Emails>[];
       json['emails'].forEach((v) {
-        emails!.add( Emails.fromJson(v));
+        emails!.add(new Emails.fromJson(v));
       });
     }
     if (json['addresses'] != null) {
       addresses = <Addresses>[];
       json['addresses'].forEach((v) {
-        addresses!.add( Addresses.fromJson(v));
+        addresses!.add(new Addresses.fromJson(v));
       });
     }
     if (json['socials'] != null) {
       socials = <Socials>[];
       json['socials'].forEach((v) {
-        socials!.add( Socials.fromJson(v));
+        socials!.add(new Socials.fromJson(v));
       });
     }
     if (json['actions'] != null) {
       actions = <Actions>[];
       json['actions'].forEach((v) {
-        actions!.add( Actions.fromJson(v));
+        actions!.add(new Actions.fromJson(v));
       });
     }
     sharedBy = json['shared_by'] != null
-        ?  SharedBy.fromJson(json['shared_by'])
+        ? new SharedBy.fromJson(json['shared_by'])
+        : null;
+    cardImages = json['card_images'] != null
+        ? new CardImages.fromJson(json['card_images'])
         : null;
     sourceContactId = json['source_contact_id'];
     industry = json['industry'];
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data =  <String, dynamic>{};
-    data['id'] = id;
-    data['card_id'] = cardId;
-    data['full_name'] = fullName;
-    data['name_prefix'] = namePrefix;
-    data['given_name'] = givenName;
-    data['family_name'] = familyName;
-    data['name_suffix'] = nameSuffix;
-    data['job_title'] = jobTitle;
-    data['department'] = department;
-    data['company'] = company;
-    data['notes'] = notes;
-    data['industry_code'] = industryCode;
-    data['needs_review'] = needsReview;
-    data['created_at'] = createdAt;
-    data['updated_at'] = updatedAt;
-    if (phones != null) {
-      data['phones'] = phones!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['card_id'] = this.cardId;
+    data['full_name'] = this.fullName;
+    data['name_prefix'] = this.namePrefix;
+    data['given_name'] = this.givenName;
+    data['family_name'] = this.familyName;
+    data['name_suffix'] = this.nameSuffix;
+    data['job_title'] = this.jobTitle;
+    data['department'] = this.department;
+    data['company'] = this.company;
+    data['notes'] = this.notes;
+    data['industry_code'] = this.industryCode;
+    data['needs_review'] = this.needsReview;
+    data['review_reasons'] = this.reviewReasons;
+    data['created_at'] = this.createdAt;
+    data['updated_at'] = this.updatedAt;
+    if (this.phones != null) {
+      data['phones'] = this.phones!.map((v) => v.toJson()).toList();
     }
-    if (emails != null) {
-      data['emails'] = emails!.map((v) => v.toJson()).toList();
+    if (this.emails != null) {
+      data['emails'] = this.emails!.map((v) => v.toJson()).toList();
     }
-    if (addresses != null) {
-      data['addresses'] = addresses!.map((v) => v.toJson()).toList();
+    if (this.addresses != null) {
+      data['addresses'] = this.addresses!.map((v) => v.toJson()).toList();
     }
-    if (socials != null) {
-      data['socials'] = socials!.map((v) => v.toJson()).toList();
+    if (this.socials != null) {
+      data['socials'] = this.socials!.map((v) => v.toJson()).toList();
     }
-    if (actions != null) {
-      data['actions'] = actions!.map((v) => v.toJson()).toList();
+    if (this.actions != null) {
+      data['actions'] = this.actions!.map((v) => v.toJson()).toList();
     }
-    if (sharedBy != null) {
-      data['shared_by'] = sharedBy!.toJson();
+    if (this.sharedBy != null) {
+      data['shared_by'] = this.sharedBy!.toJson();
     }
-    data['source_contact_id'] = sourceContactId;
-    data['industry'] = industry;
+    if (this.cardImages != null) {
+      data['card_images'] = this.cardImages!.toJson();
+    }
+    data['source_contact_id'] = this.sourceContactId;
+    data['industry'] = this.industry;
     return data;
   }
 }
@@ -221,19 +233,19 @@ class Phones {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data =  <String, dynamic>{};
-    data['e164'] = e164;
-    data['parsed_region'] = parsedRegion;
-    data['region_source'] = regionSource;
-    data['id'] = id;
-    data['raw'] = raw;
-    data['display'] = display;
-    data['type'] = type;
-    data['is_primary'] = isPrimary;
-    data['calling_code'] = callingCode;
-    data['dial_prefix'] = dialPrefix;
-    data['needs_region'] = needsRegion;
-    data['region_note'] = regionNote;
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['e164'] = this.e164;
+    data['parsed_region'] = this.parsedRegion;
+    data['region_source'] = this.regionSource;
+    data['id'] = this.id;
+    data['raw'] = this.raw;
+    data['display'] = this.display;
+    data['type'] = this.type;
+    data['is_primary'] = this.isPrimary;
+    data['calling_code'] = this.callingCode;
+    data['dial_prefix'] = this.dialPrefix;
+    data['needs_region'] = this.needsRegion;
+    data['region_note'] = this.regionNote;
     return data;
   }
 }
@@ -254,7 +266,7 @@ class Emails {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data =  Map<String, dynamic>();
+    final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
     data['email'] = this.email;
     data['type'] = this.type;
@@ -281,12 +293,12 @@ class Addresses {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data =  <String, dynamic>{};
-    data['id'] = id;
-    data['raw'] = raw;
-    data['city'] = city;
-    data['country'] = country;
-    data['is_primary'] = isPrimary;
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['raw'] = this.raw;
+    data['city'] = this.city;
+    data['country'] = this.country;
+    data['is_primary'] = this.isPrimary;
     return data;
   }
 }
@@ -309,12 +321,12 @@ class Socials {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data =  <String, dynamic>{};
-    data['id'] = id;
-    data['platform'] = platform;
-    data['handle'] = handle;
-    data['url'] = url;
-    data['is_primary'] = isPrimary;
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['platform'] = this.platform;
+    data['handle'] = this.handle;
+    data['url'] = this.url;
+    data['is_primary'] = this.isPrimary;
     return data;
   }
 }
@@ -345,13 +357,13 @@ class Actions {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data =  <String, dynamic>{};
-    data['kind'] = kind;
-    data['label'] = label;
-    data['uri'] = uri;
-    data['value'] = value;
-    data['display'] = display;
-    data['is_primary'] = isPrimary;
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['kind'] = this.kind;
+    data['label'] = this.label;
+    data['uri'] = this.uri;
+    data['value'] = this.value;
+    data['display'] = this.display;
+    data['is_primary'] = this.isPrimary;
     return data;
   }
 }
@@ -370,10 +382,29 @@ class SharedBy {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data =  <String, dynamic>{};
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['user_id'] = userId;
     data['username'] = username;
     data['display_name'] = displayName;
+    return data;
+  }
+}
+
+class CardImages {
+  String? front;
+  String? back;
+
+  CardImages({this.front, this.back});
+
+  CardImages.fromJson(Map<String, dynamic> json) {
+    front = json['front'];
+    back = json['back'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['front'] = front;
+    data['back'] = back;
     return data;
   }
 }

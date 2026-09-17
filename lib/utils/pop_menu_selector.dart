@@ -14,7 +14,20 @@ Future<void> handleDropdownSelection(
       break;
 
     case 'Delete contact':
-      showDeleteDialog(context);
+      showDeleteDialog(
+        context,
+        title: 'Delete Contact',
+        content: const Text(
+          'Are you sure you want to delete this contact? '
+          'This action cannot be undone.',
+        ),
+        onConfirm: () {
+          Navigator.pop(context);
+
+          // delete contact here
+
+        },
+      );
       break;
 
     default:
