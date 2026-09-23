@@ -33,8 +33,8 @@ class _ContactDetailsCardState extends State<ContactDetailsCard> {
 
   late List<TextEditingController> phoneControllers;
   late List<TextEditingController> emailControllers;
-
-  late final TextEditingController websiteController;
+  late List<TextEditingController> websiteControllers;
+  late List<TextEditingController> addressControllers;
 
   final TextEditingController editPhoneController = TextEditingController();
   final TextEditingController editWebsiteController = TextEditingController();
@@ -62,20 +62,16 @@ class _ContactDetailsCardState extends State<ContactDetailsCard> {
         .map((email) => TextEditingController(text: email.email ?? ''))
         .toList();
 
-    websiteController = TextEditingController(
-      text: _getWebsite(widget.contact),
-    );
-  }
+    websiteControllers = (widget.contact.socials ?? [])
+        .map((social) => TextEditingController(text: social.url ?? ''))
+        .toList();
 
-  String _getWebsite(Items contact) {
-    final socials = contact.socials ?? [];
-
-    final website = socials.cast<Socials?>().firstWhere(
-      (social) => social?.platform?.toLowerCase() == 'website',
-      orElse: () => null,
-    );
-
-    return website?.url ?? '';
+    addressControllers = (widget.contact.addresses ?? [])
+        .map(
+          (address) =>
+              TextEditingController(text: "${address.raw}, ${address.country}"),
+        )
+        .toList();
   }
 
   void _syncPhoneControllers(Items contact) {
@@ -124,14 +120,49 @@ class _ContactDetailsCardState extends State<ContactDetailsCard> {
     }
   }
 
-  void _syncWebsiteController(Items contact) {
-    final website = _getWebsite(contact);
+  void _syncWebsiteControllers(Items contact) {
+    final socials = contact.socials ?? [];
 
-    if (websiteController.text != website) {
-      websiteController.value = TextEditingValue(
-        text: website,
-        selection: TextSelection.collapsed(offset: website.length),
-      );
+    while (websiteControllers.length > socials.length) {
+      websiteControllers.removeLast().dispose();
+    }
+
+    while (websiteControllers.length < socials.length) {
+      websiteControllers.add(TextEditingController());
+    }
+
+    for (var i = 0; i < socials.length; i++) {
+      final text = socials[i].url ?? '';
+
+      if (websiteControllers[i].text != text) {
+        websiteControllers[i].value = TextEditingValue(
+          text: text,
+          selection: TextSelection.collapsed(offset: text.length),
+        );
+      }
+    }
+  }
+
+  void _syncAddressControllers(Items contact) {
+    final addresses = contact.addresses ?? [];
+
+    while (addressControllers.length > addresses.length) {
+      addressControllers.removeLast().dispose();
+    }
+
+    while (addressControllers.length < addresses.length) {
+      addressControllers.add(TextEditingController());
+    }
+
+    for (var i = 0; i < addresses.length; i++) {
+      final text = addresses[i].raw ?? '';
+
+      if (addressControllers[i].text != text) {
+        addressControllers[i].value = TextEditingValue(
+          text: text,
+          selection: TextSelection.collapsed(offset: text.length),
+        );
+      }
     }
   }
 
@@ -148,7 +179,8 @@ class _ContactDetailsCardState extends State<ContactDetailsCard> {
 
     _syncPhoneControllers(currentContact);
     _syncEmailControllers(currentContact);
-    _syncWebsiteController(currentContact);
+    _syncWebsiteControllers(currentContact);
+    _syncAddressControllers(currentContact);
   }
 
   @override
@@ -161,7 +193,6 @@ class _ContactDetailsCardState extends State<ContactDetailsCard> {
       controller.dispose();
     }
 
-    websiteController.dispose();
     editPhoneController.dispose();
     editWebsiteController.dispose();
     editEmailController.dispose();
@@ -181,7 +212,8 @@ class _ContactDetailsCardState extends State<ContactDetailsCard> {
 
     _syncPhoneControllers(currentContact);
     _syncEmailControllers(currentContact);
-    _syncWebsiteController(currentContact);
+    _syncWebsiteControllers(currentContact);
+    _syncAddressControllers(currentContact);
 
     final phones = currentContact.phones ?? [];
     final emails = currentContact.emails ?? [];
@@ -785,7 +817,7 @@ class _ContactDetailsCardState extends State<ContactDetailsCard> {
 
                         final email = editEmailController.text.trim();
 
-                        if (email.isEmpty) {
+                        if (email.isEmpty){
                           return;
                         }
 
@@ -807,99 +839,158 @@ class _ContactDetailsCardState extends State<ContactDetailsCard> {
 
           const SizedBox(height: 15),
 
-          if (websiteController.text.isNotEmpty || editingWebsite)
-            ContactEditableField(
-              icon: Icons.language,
-              label: 'Website',
-              controller: websiteController,
-              isEditing: editingWebsite,
-              keyboardType: TextInputType.url,
-              onEdit: () {
-                setState(() {
-                  editingWebsite = !editingWebsite;
-                });
-              },
-              onDelete: () {},
-            ),
+          ...List.generate(currentContact.socials?.length ?? 0, (index) {
+            final social = currentContact.socials![index];
 
-          if (websiteController.text.isEmpty && !editingWebsite)
-            AddFieldButton(
-              label: 'Add Website',
-              onPressed: () {
-                editWebsiteController.clear();
-                selectedWebsiteKind = 'Website';
+            final type = social.platform ?? '';
 
-                editDialog(
-                  context,
-                  title: 'Add a website',
-                  content: StatefulBuilder(
-                    builder: (context, dialogSetState) {
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Kind'),
+            final label = type.isNotEmpty ? type : 'Website ${index + 1}';
 
-                          const SizedBox(height: 10),
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 15),
+              child: ContactEditableField(
+                icon: Icons.language,
+                label: label,
+                controller: websiteControllers[index],
+                isEditing: editingWebsite,
+                keyboardType: TextInputType.url,
+                onEdit: () {},
+                onDelete: () {},
+              ),
+            );
+          }),
 
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: [
-                              PhoneTypeContainer(
-                                text: 'LinkedIn',
-                                isSelected: selectedWebsiteKind == 'LinkedIn',
-                                onTap: () {
-                                  dialogSetState(() {
-                                    selectedWebsiteKind = 'LinkedIn';
-                                  });
-                                },
-                              ),
-                              PhoneTypeContainer(
-                                text: 'X',
-                                isSelected: selectedWebsiteKind == 'X',
-                                onTap: () {
-                                  dialogSetState(() {
-                                    selectedWebsiteKind = 'X';
-                                  });
-                                },
-                              ),
-                              PhoneTypeContainer(
-                                text: 'Website',
-                                isSelected: selectedWebsiteKind == 'Website',
-                                onTap: () {
-                                  dialogSetState(() {
-                                    selectedWebsiteKind = 'Website';
-                                  });
-                                },
-                              ),
-                              PhoneTypeContainer(
-                                text: 'Others',
-                                isSelected: selectedWebsiteKind == 'Others',
-                                onTap: () {
-                                  dialogSetState(() {
-                                    selectedWebsiteKind = 'Others';
-                                  });
-                                },
-                              ),
-                            ],
-                          ),
+          AddFieldButton(
+            label: 'Add a link',
+            onPressed: () {
+              editWebsiteController.clear();
+              selectedWebsiteKind = 'Website';
 
-                          const SizedBox(height: 15),
+              editDialog(
+                context,
+                title: 'Add a link',
+                content: StatefulBuilder(
+                  builder: (context, dialogSetState) {
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Kind'),
 
-                          CustomTextField(
-                            title: 'URL',
-                            controller: editWebsiteController,
-                            keyboardType: TextInputType.url,
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                  onSave: () {},
-                );
-              },
-            ),
+                        const SizedBox(height: 10),
+
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            PhoneTypeContainer(
+                              text: 'LinkedIn',
+                              isSelected: selectedWebsiteKind == 'LinkedIn',
+                              onTap: () {
+                                dialogSetState(() {
+                                  selectedWebsiteKind = 'LinkedIn';
+                                });
+                              },
+                            ),
+                            PhoneTypeContainer(
+                              text: 'X',
+                              isSelected: selectedWebsiteKind == 'X',
+                              onTap: () {
+                                dialogSetState(() {
+                                  selectedWebsiteKind = 'X';
+                                });
+                              },
+                            ),
+                            PhoneTypeContainer(
+                              text: 'Website',
+                              isSelected: selectedWebsiteKind == 'Website',
+                              onTap: () {
+                                dialogSetState(() {
+                                  selectedWebsiteKind = 'Website';
+                                });
+                              },
+                            ),
+                            PhoneTypeContainer(
+                              text: 'Others',
+                              isSelected: selectedWebsiteKind == 'Others',
+                              onTap: () {
+                                dialogSetState(() {
+                                  selectedWebsiteKind = 'Others';
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 15),
+
+                        CustomTextField(
+                          title: 'URL',
+                          controller: editWebsiteController,
+                          keyboardType: TextInputType.url,
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                onSave: () {
+                  final contactId = widget.contact.id;
+
+                  if (contactId == null || contactId.isEmpty) {
+                    return;
+                  }
+
+
+                },
+              );
+            },
+          ),
+
+          ...List.generate(currentContact.addresses?.length ?? 0, (index) {
+            final address = currentContact.addresses![index];
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 15),
+              child: ContactEditableField(
+                icon: Icons.location_on,
+                label: 'Address ${index + 1}',
+                controller: addressControllers[index],
+                isEditing: false,
+                keyboardType: TextInputType.streetAddress,
+                onEdit: () {},
+                onDelete: () {},
+              ),
+            );
+          }),
+
+          AddFieldButton(
+            label: 'Add Address',
+            onPressed: () {
+              editWebsiteController.clear();
+              selectedWebsiteKind = 'Website';
+
+              editDialog(
+                context,
+                title: 'Add Address',
+                content: StatefulBuilder(
+                  builder: (context, dialogSetState) {
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CustomTextField(
+                          title: 'Address',
+                          controller: editWebsiteController,
+                          keyboardType: TextInputType.url,
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                onSave: () {},
+              );
+            },
+          ),
         ],
       ),
     );

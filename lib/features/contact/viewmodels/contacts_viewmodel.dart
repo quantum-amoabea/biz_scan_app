@@ -2,6 +2,7 @@ import 'package:biz_scan_app/core/network/dio_client.dart';
 import 'package:biz_scan_app/core/toast_message.dart';
 import 'package:biz_scan_app/features/contact/domain/models/update_email.dart';
 import 'package:biz_scan_app/features/contact/domain/models/update_phone.dart';
+import 'package:biz_scan_app/features/contact/domain/models/update_socials.dart';
 import 'package:flutter/cupertino.dart';
 
 import '../domain/models/contacts.dart';
@@ -426,7 +427,37 @@ class ContactsViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> addWebsite() async {}
+    Future<void> addWebsite(String contactId, UpdateSocials socials) async {
+    try {
+      isSavingContactDetails = true;
+      notifyListeners();
+
+      final response = await _dioClient.post(
+        'api/v1/contacts/$contactId/socials',
+        socials.toJson(),
+      );
+
+      final contactDetails = Items.fromJson(response);
+
+      final contactIndex = contacts.indexWhere(
+        (contact) => contact.id == contactId,
+      );
+
+      if (contactIndex != -1) {
+        contacts[contactIndex].socials ??= [];
+
+        contacts[contactIndex].socials = contactDetails.socials;
+
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('the error is $e');
+      showToast(message: e.toString());
+    } finally {
+      isSavingContactDetails = false;
+      notifyListeners();
+    }
+  }
 
   Future<void> addAddress() async {}
 
